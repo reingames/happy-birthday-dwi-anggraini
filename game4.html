@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ai Tic-Tac-Toe - Game Edition</title>
+    
+    <!-- Google Fonts & FontAwesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --sky-bg: #bae6fd; 
+            --sky-accent: #38bdf8;
+            --sky-glow: rgba(56, 189, 248, 0.5);
+            --deep-navy: #090d16;
+            --card-bg: #0f172a; 
+            --text-light: #f8fafc;
+            --gray-text: #94a3b8;
+            --gold-accent: #fbbf24;
+            --gold-glow: rgba(251, 191, 36, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            /* Latar belakang gelap HD Sci-Fi Game Console */
+            background: linear-gradient(135deg, var(--deep-navy) 0%, #0f172a 50%, #1e293b 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- DESAIN BACKGROUND MENARIK (AURORA NEON GLOW) --- */
+        .aurora-glow-1 {
+            position: fixed;
+            top: -10%; left: -10%;
+            width: 320px; height: 320px;
+            background: rgba(14, 165, 233, 0.4);
+            filter: blur(80px);
+            border-radius: 50%;
+            animation: floatGlow1 12s infinite alternate ease-in-out;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .aurora-glow-2 {
+            position: fixed;
+            bottom: -15%; right: -10%;
+            width: 380px; height: 380px;
+            background: rgba(56, 189, 248, 0.35);
+            filter: blur(90px);
+            border-radius: 50%;
+            animation: floatGlow2 15s infinite alternate-reverse ease-in-out;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        @keyframes floatGlow1 {
+            0% { transform: scale(1) translate(0, 0); }
+            100% { transform: scale(1.2) translate(40px, 30px); }
+        }
+
+        @keyframes floatGlow2 {
+            0% { transform: scale(1) translate(0, 0); }
+            100% { transform: scale(1.15) translate(-30px, -40px); }
+        }
+
+        /* --- KARTU UTAMA GAME (GLASSMORPHISM STYLE) --- */
+        .game-card-container {
+            width: 100%;
+            max-width: 360px;
+            background: var(--card-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-radius: 30px;
+            padding: 24px;
+            box-shadow: 0 0 25px var(--sky-glow), inset 0 0 15px rgba(56, 189, 248, 0.15);
+            border: 2px solid var(--sky-accent);
+            text-align: center;
+            z-index: 10;
+            margin: auto;
+            position: relative;
+        }
+
+        .game-title h2 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-light);
+            text-shadow: 0 0 10px var(--sky-glow);
+            letter-spacing: -0.5px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .game-title p {
+            font-size: 0.8rem;
+            color: var(--gray-text);
+            font-weight: 600;
+        }
+
+        /* --- STATUS BAR SKOR --- */
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            padding: 10px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+        }
+
+        .score-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--gray-text);
+        }
+
+        .score-val {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            margin-top: 2px;
+        }
+
+        /* --- GRID BOARD 3X3 --- */
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            width: 280px;
+            height: 280px;
+            margin: 0 auto 20px;
+        }
+
+        .grid-cell {
+            background-color: rgba(30, 41, 59, 0.8);
+            border: 2px solid rgba(56, 189, 248, 0.3);
+            border-radius: 16px;
+            font-size: 2.6rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            transition: all 0.15s ease;
+        }
+
+        .grid-cell:active {
+            transform: scale(0.92);
+        }
+
+        /* Tanda O (Pemain - Biru Neon) */
+        .grid-cell.cell-o {
+            color: var(--sky-accent);
+            text-shadow: 0 0 10px var(--sky-glow);
+            border-color: var(--sky-accent);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+        }
+
+        /* Tanda X (AI Komputer - Kuning Emas) */
+        .grid-cell.cell-x {
+            color: var(--gold-accent);
+            text-shadow: 0 0 10px var(--gold-glow);
+            border-color: var(--gold-accent);
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.2);
+        }
+
+        /* --- BUTTONS --- */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 14px;
+            border: none;
+            font-size: 0.85rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.15s ease;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-restart {
+            background-color: var(--primary-dark);
+            color: #ffffff;
+            border: 1.5px solid var(--sky-border);
+            box-shadow: 0 4px 12px var(--sky-glow);
+        }
+
+        .btn-restart:active {
+            box-shadow: 0 0 15px var(--sky-accent);
+        }
+
+        .btn-exit {
+            background-color: rgba(30, 41, 59, 0.8);
+            color: var(--text-light);
+            border: 1.5px solid var(--gray-text);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ornamen Aurora Latar Belakang -->
+    <div class="aurora-glow-1"></div>
+    <div class="aurora-glow-2"></div>
+
+    <!-- KARTU UTAMA GAME (GLASSMORPHISM STYLE) -->
+    <div class="game-card-container">
+        <div class="game-title">
+            <h2>Ai Tic-Tac-Toe</h2>
+            <p>Kalahkan taktik </p>
+        </div>
+
+        <!-- Papan Skor -->
+        <div class="score-board">
+            <div class="score-item">
+                <span>PEMAIN (O)</span>
+                <span class="score-val" id="player-score" style="color: var(--sky-accent);">0</span>
+            </div>
+            <div class="score-item">
+                <span>SERI</span>
+                <span class="score-val" id="draw-score">0</span>
+            </div>
+            <div class="score-item">
+                <span>KOMPUTER (X)</span>
+                <span class="score-val" id="cpu-score" style="color: var(--gold-accent);">0</span>
+            </div>
+        </div>
+
+        <!-- Grid Board 3x3 -->
+        <div id="game-board">
+            <div class="grid-cell" data-index="0" onclick="playerMove(0)"></div>
+            <div class="grid-cell" data-index="1" onclick="playerMove(1)"></div>
+            <div class="grid-cell" data-index="2" onclick="playerMove(2)"></div>
+            <div class="grid-cell" data-index="3" onclick="playerMove(3)"></div>
+            <div class="grid-cell" data-index="4" onclick="playerMove(4)"></div>
+            <div class="grid-cell" data-index="5" onclick="playerMove(5)"></div>
+            <div class="grid-cell" data-index="6" onclick="playerMove(6)"></div>
+            <div class="grid-cell" data-index="7" onclick="playerMove(7)"></div>
+            <div class="grid-cell" data-index="8" onclick="playerMove(8)"></div>
+        </div>
+
+        <!-- Tombol Kontrol Bawah -->
+        <div class="btn-group">
+            <button class="btn btn-exit" onclick="confirmExit()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Keluar</button>
+            <button class="btn btn-restart" onclick="restartGame()"><i class="fa-solid fa-rotate-right"></i> Reset</button>
+        </div>
+    </div>
+
+    <script>
+        // Status Game
+        let board = ["", "", "", "", "", "", "", "", ""]; // Mengisi array kotak kosong (3x3)
+        let playerSymbol = "O";
+        let cpuSymbol = "X";
+        let gameActive = true;
+
+        // Skor Statistik [1]
+        let playerScore = 0;
+        let cpuScore = 0;
+        let drawScore = 0;
+
+        // Kombinasi Kemenangan Klasik (8 Kombinasi)
+        const WINNING_COMBINATIONS = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Baris mendatar
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Baris menurun
+            [0, 4, 8], [2, 4, 6]             // Baris miring diagonal
+        ];
+
+        // --- SISTEM GENERASI SUARA RETRO (SINTESIS WEB AUDIO API) --- [1]
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playRetroSound(type) {
+            initAudio();
+            if (!audioCtx) return;
+
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'tap') {
+                // Suara ketukan tanda lembut [1]
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.linearRampToValueAtTime(80, now + 0.08);
+                gainNode.gain.setValueAtTime(0.12, now);
+                gainNode.gain.linearRampToValueAtTime(0, now + 0.08);
+                osc.start(now);
+                osc.stop(now + 0.08);
+            } else if (type === 'win') {
+                // Tangga nada naik ceria saat menang [1]
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(523, now); // C5
+                osc.frequency.setValueAtTime(659, now + 0.08); // E5
+                osc.frequency.setValueAtTime(784, now + 0.16); // G5
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.linearRampToValueAtTime(0, now + 0.35);
+                osc.start(now);
+                osc.stop(now + 0.35);
+            } else if (type === 'lose') {
+                // Nada turun sedih saat kalah [1]
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.linearRampToValueAtTime(40, now + 0.45);
+                gainNode.gain.setValueAtTime(0.2, now);
+                gainNode.gain.linearRampToValueAtTime(0, now + 0.45);
+                osc.start(now);
+                osc.stop(now + 0.45);
+            } else if (type === 'draw') {
+                // Nada ganda netral saat seri [1]
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(440, now); // A4
+                osc.frequency.setValueAtTime(440, now + 0.08);
+                gainNode.gain.setValueAtTime(0.08, now);
+                gainNode.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            }
+        }
+
+        // --- GERAKAN PEMAIN (TAP CELL) --- [1]
+        function playerMove(index) {
+            initAudio(); // Aktifkan Web Audio konteks saat pertama kali berinteraksi [1]
+            if (!gameActive || board[index] !== "") return;
+
+            // Isi nilai papan
+            board[index] = playerSymbol;
+            playRetroSound('tap'); // Mainkan suara ketuk [1]
+            updateBoardUI();
+
+            // Periksa apakah pemain menang
+            if (checkWin(playerSymbol)) {
+                handleEndGame('win');
+                return;
+            }
+
+            if (checkDraw()) {
+                handleEndGame('draw');
+                return;
+            }
+
+            // Jika masih berjalan, jalankan giliran AI Komputer dengan sedikit jeda agar natural [1]
+            gameActive = false; // Kunci giliran selama komputer berpikir
+            setTimeout(cpuMove, 450);
+        }
+
+        // --- SISTEM KECERDASAN BUATAN AI TAKTIS (BEATABLE TACTICAL BOT) --- [1]
+        function cpuMove() {
+            if (checkDraw()) {
+                handleEndGame('draw');
+                return;
+            }
+
+            // Cari langkah terbaik berdasarkan prioritas taktis [1]:
+            // Prioritas 1: Ambil langkah menang instan jika ada [1]
+            let bestMove = findWinningMove(cpuSymbol);
+            
+            // Prioritas 2: Blokir langkah menang pemain jika terancam kalah [1]
+            if (bestMove === -1) {
+                bestMove = findWinningMove(playerSymbol);
+            }
+
+            // Prioritas 3: Ambil titik tengah jika kosong (titik strategis) [1]
+            if (bestMove === -1 && board[4] === "") {
+                bestMove = 4;
+            }
+
+            // Prioritas 4: Ambil titik sudut secara acak jika kosong [1]
+            if (bestMove === -1) {
+                const corners = [0, 2, 6, 8].filter(idx => board[idx] === "");
+                if (corners.length > 0) {
+                    bestMove = corners[Math.floor(Math.random() * corners.length)];
+                }
+            }
+
+            // Prioritas 5: Ambil sisa titik mana saja secara acak [1]
+            if (bestMove === -1) {
+                const emptyIndexes = board.map((val, idx) => val === "" ? idx : -1).filter(idx => idx !== -1);
+                if (emptyIndexes.length > 0) {
+                    bestMove = emptyIndexes[Math.floor(Math.random() * emptyIndexes.length)];
+                }
+            }
+
+            // Jalankan langkah AI
+            if (bestMove !== -1) {
+                board[bestMove] = cpuSymbol;
+                playRetroSound('tap'); // Mainkan suara ketuk AI [1]
+                updateBoardUI();
+
+                if (checkWin(cpuSymbol)) {
+                    handleEndGame('lose');
+                    return;
+                }
+
+                if (checkDraw()) {
+                    handleEndGame('draw');
+                    return;
+                }
+            }
+
+            gameActive = true; // Serahkan kembali giliran ke pemain
+        }
+
+        // Fungsi pencari langkah menang instan (atau langkah blokir lawan) [1]
+        function findWinningMove(symbol) {
+            for (let combination of WINNING_COMBINATIONS) {
+                const [a, b, c] = combination;
+                // Jika dua kotak dalam satu kombinasi sudah terisi simbol senada, dan satu kotak sisa kosong:
+                if (board[a] === symbol && board[b] === symbol && board[c] === "") return c;
+                if (board[a] === symbol && board[c] === symbol && board[b] === "") return b;
+                if (board[b] === symbol && board[c] === symbol && board[a] === "") return a;
+            }
+            return -1; // Tidak ditemukan langkah menang/blokir
+        }
+
+        // Periksa apakah simbol tertentu memenangkan baris kombinasi
+        function checkWin(symbol) {
+            return WINNING_COMBINATIONS.some(combination => {
+                return combination.every(index => board[index] === symbol);
+            });
+        }
+
+        // Periksa jika seluruh kotak terisi penuh (Seri)
+        function checkDraw() {
+            return board.every(cell => cell !== "");
+        }
+
+        // --- SISTEM AKHIR PERTANDINGAN & STATISTIK SKOR --- [1]
+        function handleEndGame(result) {
+            gameActive = false;
+
+            if (result === 'win') {
+                playerScore++;
+                playRetroSound('win'); // Suara menang [1]
+            } else if (result === 'lose') {
+                cpuScore++;
+                playRetroSound('lose'); // Suara kalah [1]
+            } else if (result === 'draw') {
+                drawScore++;
+                playRetroSound('draw'); // Suara seri [1]
+            }
+
+            updateScoreUI();
+            
+            // Otomatis memulai ronde baru setelah jeda 1,5 detik agar bisa dibaca [1]
+            setTimeout(restartGame, 1500);
+        }
+
+        function updateBoardUI() {
+            const cells = document.querySelectorAll(".grid-cell");
+            board.forEach((val, idx) => {
+                const cell = cells[idx];
+                cell.innerText = val;
+                
+                // Tambahkan warna kelas yang berbeda sesuai tandanya
+                if (val === "O") {
+                    cell.className = "grid-cell cell-o";
+                } else if (val === "X") {
+                    cell.className = "grid-cell cell-x";
+                } else {
+                    cell.className = "grid-cell";
+                }
+            });
+        }
+
+        function updateScoreUI() {
+            document.getElementById("player-score").innerText = playerScore;
+            document.getElementById("cpu-score").innerText = cpuScore;
+            document.getElementById("draw-score").innerText = drawScore;
+        }
+
+        function restartGame() {
+            board = ["", "", "", "", "", "", "", "", ""];
+            updateBoardUI();
+            gameActive = true;
+        }
+
+        // Fungsi Keluar Game dengan konfirmasi [2.1]
+        function confirmExit() {
+            const isConfirmed = confirm("Apakah anda yakin ingin keluar dari game?");
+            if (isConfirmed) {
+                window.location.href = "home.html"; // Kembali ke file home.html [2.1]
+            }
+        }
+    </script>
+</body>
+</html>

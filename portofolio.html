@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ai | Digital Portfolio Edition</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@200;700;900&family=Plus+Jakarta+Sans:wght@300;400;800&display=swap" rel="stylesheet">
+    
+    <!-- Framework -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background-color: #fcfcfc;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #1a1a1a;
+            overflow-x: hidden;
+        }
+
+        .page-border {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            border: 12px solid #ffffff;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .vertical-text {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-family: 'Noto Serif JP', serif;
+        }
+
+        .reveal-box {
+            position: relative;
+            overflow: hidden;
+            clip-path: inset(0 100% 0 0);
+        }
+
+        section {
+            min-height: 100vh;
+            width: 100%;
+            position: relative;
+            border-bottom: 1px solid #1a1a1a;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .side-border { border-right: 1px solid #1a1a1a; }
+
+        .hero-overlay {
+            background: linear-gradient(90deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%);
+        }
+
+        .portfolio-label {
+            font-size: 10px;
+            letter-spacing: 0.5em;
+            text-transform: uppercase;
+            font-weight: 800;
+            color: #888;
+        }
+
+        /* Balik ke sistem Auto-Scroll */
+        #h-scroll {
+            display: flex;
+            width: max-content; /* Memanjang ke samping sesuai jumlah foto */
+            overflow: visible; 
+            gap: 40px; /* Jarak antar foto */
+        }
+        
+        /* Ukuran Foto Diperkecil */
+        .gallery-item {
+            width: 220px; /* Lebih kecil */
+            height: 300px;
+            flex-shrink: 0;
+            background: white;
+            padding: 8px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="page-border"></div>
+
+    <!-- SECTION 1: HERO -->
+    <section class="relative bg-black text-white overflow-hidden">
+        <div class="absolute inset-0 z-0">
+            <img src="https://i.postimg.cc/fySJFHnv/IMG-4228.jpg" class="w-full h-full object-cover opacity-80 scale-110" id="hero-bg-img">
+            <div class="absolute inset-0 hero-overlay z-10"></div>
+        </div>
+
+        <div class="relative z-20 w-full lg:w-1/2 h-full side-border p-12 flex flex-col justify-between">
+            <div class="portfolio-label">THE PERSON BEHIND
+            <div>
+                <div class="vertical-text text-[12vh] lg:text-[15vh] leading-none font-black tracking-widest opacity-0" id="hero-title">軌跡</div>
+                <div class="mt-12">
+                    <p class="text-xs lg:text-sm tracking-[0.8em] font-light overflow-hidden">
+                        <span class="inline-block translate-y-full" id="hero-sub">THE LOCUS OF AI'S JOURNEY</span>
+                    </p>
+                </div>
+            </div>
+            <div class="text-[10px] opacity-40">ESTABLISHED 2026</div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: PHILOSOPHY -->
+    <section class="bg-[#ffffff] flex flex-col lg:flex-row items-center justify-center p-12 lg:p-24">
+        <div class="w-full lg:w-1/3 mb-10 lg:mb-0">
+            <span class="portfolio-label block mb-4 text-blue-500">Intro</span>
+            <h2 class="text-4xl font-black leading-tight opacity-0" id="quote-text">FROM AIN TO AI<br>BEHIND THE NAME</h2>
+        </div>
+        <div class="w-full lg:w-2/3 lg:pl-20">
+            <p class="text-xl lg:text-2xl leading-relaxed text-gray-500 font-light">
+                    Dwi Anggraini dikenal sebagai Ain di Indonesia, pada kala itu sering dipanggil ain oleh teman-temanya. Kemudian panggilanya berganti menjadi Ai di Jepang. Dua panggilan, satu orang, dan berbagai cerita yang terus bertambah di setiap langkah perjalanan.
+            </p>
+            <div class="w-full h-[1px] bg-black mt-12 origin-left scale-x-0" id="quote-line"></div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: CORE CONTENT GRID -->
+    <section class="bg-[#1a1a1a] text-white">
+        <!-- Main Feature -->
+        <div class="w-full lg:w-3/5 side-border border-b border-white/10 p-8 lg:p-16 flex flex-col gap-10">
+            <div class="reveal-box aspect-[4/3]" id="grid-img-1">
+                <img src="https://i.postimg.cc/jj3qpZQk/IMG-3258.jpg" class="w-full h-full object-cover">
+            </div>
+            <div class="opacity-0 anim-text">
+                <div class="flex items-center gap-4 mb-4">
+                    <span class="w-8 h-[1px] bg-blue-500"></span>
+                    <span class="text-[10px] font-bold tracking-[0.4em] text-blue-500">Stories in frames</span>
+                </div>
+                <h3 class="text-4xl font-bold mb-6 font-serif tracking-tight">A Little About Me</h3>
+                <p class="text-sm leading-loose opacity-50 max-w-sm">
+                    Ain di Indonesia, Ai di Jepang. Seorang perantau yang sedang mengumpulkan pengalaman, kenangan, dan cerita di negeri orang.
+                </p>
+            </div>
+        </div>
+
+        <!-- Side Feature -->
+        <div class="w-full lg:w-2/5 border-b border-white/10 flex flex-col">
+            
+            <!-- MEMORIES ARCHIVE DENGAN BACKGROUND FOTO GELAP -->
+            <div class="h-1/2 border-b border-white/10 p-12 flex items-center justify-center relative overflow-hidden">
+                <!-- Background Image Layer -->
+                <div class="absolute inset-0 z-0">
+                    <img src="https://i.postimg.cc/85FkNMtm/IMG-3194.jpg" class="w-full h-full object-cover opacity-50 grayscale">
+                    <div class="absolute inset-0 bg-black/60"></div> <!-- Efek Gelap -->
+                </div>
+                <!-- Text Layer -->
+                <div class="relative z-10 vertical-text text-xl font-serif tracking-[1em] opacity-80 uppercase text-white">
+                        Through the Lens
+                </div>
+            </div>
+
+            <div class="h-1/2 p-8 lg:p-12 flex flex-col justify-end gap-6">
+                <div class="reveal-box aspect-square" id="grid-img-2">
+                    <img src="https://i.postimg.cc/ZYDBvknM/IMG-2528.jpg" class="w-full h-full object-cover">
+                </div>
+                <div class="portfolio-label text-[8px]">Ref. 2025 / AUTUMN</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="sec-gallery" class="bg-[#f0f0f0] py-24 overflow-hidden flex-col">
+        <div class="px-12 mb-16 flex justify-between items-end">
+            <h2 class="text-5xl lg:text-7xl font-black text-black leading-none tracking-tighter opacity-0" id="gallery-title">
+                SHOTS ON<br>THE ROAD.
+            </h2>
+            <div class="portfolio-label pb-2 italic">Scroll down to see more →</div>
+        </div>
+
+        <div id="h-scroll" class="px-12">
+            <div class="gallery-item rotate-2">
+                <img src="https://i.postimg.cc/Jny7MZpL/IMG-3196.jpg" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700">
+            </div>
+            <div class="gallery-item -rotate-2">
+                <img src="https://i.postimg.cc/B6YDLf5P/IMG-3748.jpg" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700">
+            </div>
+            <div class="gallery-item rotate-3">
+                <img src="https://i.postimg.cc/c1mk02tV/IMG-0123.jpg" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700">
+            </div>
+            <div class="gallery-item -rotate-1">
+                <img src="https://i.postimg.cc/14xKXZPT/IMG-3892.jpg" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700">
+            </div>
+        </div>
+    </section>
+
+    <!-- SEPARATOR LINE -->
+    <div class="w-full h-[2px] bg-gradient-to-r from-transparent via-gray-400/30 to-transparent"></div>
+
+    <!-- FOOTER -->
+    <footer class="bg-[#111111] py-4 px-6">
+        <div class="flex flex-col items-center justify-center text-center">
+            <img src="https://i.postimg.cc/W4vcpKpZ/logorein.png" alt="Rein Logo" class="w-24 h-auto mb-5 opacity-0" id="rein-logo">
+            <p class="text-white text-[9px] tracking-[0.6em] font-bold uppercase mb-1">Produced by REIN</p>
+            <p class="text-white/30 text-[7px] uppercase tracking-[0.3em] max-w-[250px] leading-loose">
+                © 2026 For Ai Exclusive Edition<br class="block lg:hidden"> All Rights Reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        // 1. Hero Animation
+        window.addEventListener('load', () => {
+            const tl = gsap.timeline();
+            tl.to("#hero-title", { opacity: 1, duration: 1.5, ease: "power4.out" })
+              .to("#hero-sub", { y: 0, duration: 0.8, ease: "power2.out" }, "-=1")
+              .to("#hero-bg-img", { scale: 1, duration: 3, ease: "power2.out" }, "0");
+        });
+
+        // 2. Philosophy Animation
+        gsap.to("#quote-text", {
+            scrollTrigger: { trigger: "#quote-text", start: "top 85%" },
+            opacity: 1, duration: 1.2, ease: "power3.out"
+        });
+        gsap.to("#quote-line", {
+            scrollTrigger: { trigger: "#quote-line", start: "top 95%" },
+            scaleX: 1, duration: 2, ease: "expo.inOut"
+        });
+
+        // 3. Grid Reveal
+        gsap.utils.toArray(".reveal-box").forEach(box => {
+            gsap.to(box, {
+                scrollTrigger: { trigger: box, start: "top 80%" },
+                clipPath: "inset(0 0% 0 0)",
+                duration: 1.8,
+                ease: "expo.inOut"
+            });
+        });
+
+        gsap.utils.toArray(".anim-text").forEach(txt => {
+            gsap.to(txt, {
+                scrollTrigger: { trigger: txt, start: "top 90%" },
+                opacity: 1, y: -20, duration: 1.2, ease: "power3.out"
+            });
+        });
+
+        // 4. Pergerakan Foto Otomatis saat Scroll (Auto-Move)
+        gsap.to("#h-scroll", {
+            x: "-50%", // Seberapa jauh foto bergeser ke kiri
+            ease: "none",
+            scrollTrigger: {
+                trigger: "#sec-gallery", // Menggunakan ID section gallery
+                start: "top center",      // Mulai saat section masuk tengah layar
+                end: "bottom top",        // Selesai saat section keluar layar
+                scrub: 1.5,               // Kelancaran gerakan (semakin besar semakin lambat/mulus)
+            }
+        });
+
+        // Animasi Judul
+        gsap.to("#gallery-title", {
+            scrollTrigger: { trigger: "#gallery-title", start: "top 80%" },
+            opacity: 1, y: -10, duration: 1.5
+        });
+        // 5. Rein Logo Reveal
+        gsap.to("#rein-logo", {
+            scrollTrigger: { trigger: "footer", start: "top 98%" },
+            opacity: 1, scale: 1, duration: 2.5, ease: "expo.out"
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ai | 25th Exclusive Edition</title>
+    
+    <!-- Fonts & Icons (Wajib Koneksi Internet) -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Noto+Serif+JP:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <style>
+/* --- GAYA HEADER ATAS (Biru Muda Sesuai Tema) --- */
+.top-header {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 60px;
+    background-color:#4BB8FA;
+    border-bottom: 1px solid rgba(14, 165, 233, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 1500; /* Di atas isi halaman, di bawah modal menu */
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.05);
+}
+
+/* Tombol Garis Tiga (Kiri) */
+.header-menu-btn {
+    font-size: 1.3rem;
+    color: #ffffff;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+}
+
+.header-menu-btn:active {
+    transform: scale(0.9);
+}
+
+/* Area Logo Ai (Kanan) */
+.header-logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo-placeholder {
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--primary);
+    letter-spacing: -0.5px;
+}
+/* --- GAYA LOGO PNG (ESTETIK & TRANSPARAN) --- */
+.logo-img {
+    height: 36px;          /* Tinggi diatur agar pas di dalam header tinggi 60px */
+    width: auto;           /* Lebar otomatis mengikuti skala asli gambar logo Anda */
+    max-width: 120px;      /* Batas maksimal lebar agar logo tidak terlalu lebar ke samping */
+    object-fit: contain;   /* Menjaga logo PNG transparan Anda tampil utuh tanpa terpotong */
+    display: block;
+}
+
+/* --- DRAWER SISI KIRI (LACI GESER) --- */
+#menu-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 5000;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+#menu-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+.menu-drawer {
+    position: absolute;
+    top: 0; left: -280px; /* Masuk dari sisi kiri */
+    width: 75%; max-width: 280px;
+    height: 100%;
+    background: var(--white);
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.05);
+    padding: 40px 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    transition: left 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+#menu-overlay.active .menu-drawer {
+    left: 0; /* Meluncur ke kanan */
+}
+
+.menu-drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 15px;
+}
+
+.menu-drawer-header h3 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.close-drawer {
+    font-size: 1.6rem;
+    cursor: pointer;
+    color: #94a3b8;
+    line-height: 1;
+}
+
+.menu-links {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    text-align: left;
+}
+
+.menu-links li a {
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 700;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    transition: color 0.2s;
+}
+
+.menu-links li a i {
+    margin-right: 8px;
+    color: var(--primary);
+}
+
+/* Sub-menu lipat untuk Daftar Isi */
+.submenu-list {
+    list-style: none;
+    padding-left: 15px;
+    margin-top: 5px;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    border-left: 2px solid #f1f5f9;
+}
+
+.submenu-list.open {
+    display: flex;
+}
+
+.submenu-list li a {
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    color: #64748b !important;
+    padding: 4px 0 !important;
+}
+
+/* --- POP-UP MODAL CREDIT --- */
+#credit-modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+#credit-modal.active {
+    display: flex;
+    opacity: 1;
+}
+
+.credit-box {
+    background: var(--white);
+    padding: 30px;
+    border-radius: 30px;
+    text-align: center;
+    max-width: 320px;
+    width: 100%;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.credit-box h3 {
+    font-size: 1.2rem; font-weight: 800; margin-bottom: 10px;
+    color: var(--text);
+}
+
+.credit-box p {
+    font-size: 0.85rem; color: #64748b; line-height: 1.6; margin-bottom: 25px;
+}
+        :root {
+            --primary: #0ea5e9;
+            --secondary: #e0f2fe;
+            --bg: #f8fafc;
+            --white: #ffffff;
+            --text: #1e293b;
+        }
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* --- Navigation Bar (iPhone Style) --- */
+        nav {
+            position: fixed;
+            bottom: 25px; left: 50%;
+            transform: translateX(-50%);
+            width: 95%; max-width: 500px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            padding: 15px 10px;
+            border-radius: 35px;
+            display: flex;
+            justify-content: space-around;
+            z-index: 1000;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        nav a {
+            color: #94a3b8;
+            font-size: 1.4rem; /* Ukuran icon diperbesar */
+            transition: 0.3s;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        nav a span {
+            font-size: 0.6rem;
+            font-weight: 700;
+            margin-top: 4px;
+            text-transform: uppercase;
+        }
+
+        nav a.active {
+            color: var(--primary);
+            transform: translateY(-8px);
+        }
+
+        /* --- Page Management --- */
+        .page {
+            display: none;
+            min-height: 100vh;
+            padding: 60px 20px 140px;
+            animation: slideUp 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .page.active { display: block; }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Typography & Elements --- */
+        .header { margin-top: 20px; margin-bottom: 40px; }
+        .header h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -2px; line-height: 1.1; }
+        .header span { color: var(--primary); }
+
+        .card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 30px;
+            margin-bottom: 20px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.02);
+        }
+
+        .img-box {
+            width: 100%; height: 400px;
+            border-radius: 30px;
+            background-size: cover;
+            background-position: center;
+            margin-bottom: 25px;
+            background-color: #e2e8f0;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+        }
+
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .bento-card {
+            background: white; padding: 20px; border-radius: 25px; border: 1px solid #f1f5f9;
+        }
+
+        .full { grid-column: span 2; }
+
+        .btn-main {
+            background: var(--primary); color: white; padding: 18px;
+            border-radius: 20px; border: none; font-weight: 700; width: 100%;
+            font-size: 1rem; cursor: pointer; box-shadow: 0 10px 20px rgba(14, 165, 233, 0.2);
+        }
+
+        /* --- Custom Section for Long Pages --- */
+        .section-title {
+            font-size: 0.8rem; font-weight: 800; color: var(--primary);
+            letter-spacing: 2px; text-transform: uppercase; margin-bottom: 15px; display: block;
+        }
+
+        .sub-title-hb {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 5px; /* Memberi jarak agar terlihat eksklusif */
+            color: var(--primary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        /* ==================== STYLE BARU: SPOTIFY MUSIC PLAYER ==================== */
+        .spotify-container {
+            background: #121212; /* Warna Hitam khas Spotify */
+            border-radius: 30px;
+            padding: 24px 20px;
+            color: #ffffff;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+            margin-bottom: 20px;
+        }
+
+        .spotify-header {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 22px;
+        }
+
+        .spotify-art {
+            width: 85px;
+            height: 85px;
+            border-radius: 12px;
+            background-image: url('https://i.postimg.cc/Dymq00MX/Blue-Simple-Happy-Birthday-Instagram-Post.png');
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+        }
+
+        .spotify-info h2 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+        }
+
+        .spotify-info p {
+            font-size: 0.75rem;
+            color: #b3b3b3;
+            font-weight: 600;
+        }
+
+        .spotify-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .spotify-btn-group {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            color: #b3b3b3;
+            font-size: 1.25rem;
+        }
+
+        .spotify-btn-group i:active {
+            color: #ffffff;
+        }
+
+        .spotify-play-btn {
+            background: #1db954; /* Hijau Khas Spotify */
+            color: #ffffff;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(29, 185, 84, 0.4);
+            transition: transform 0.2s;
+        }
+
+        .spotify-play-btn:active {
+            transform: scale(0.92);
+        }
+
+        .spotify-tracklist {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            border-top: 1px solid #282828;
+            padding-top: 15px;
+        }
+
+        .spotify-track {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 10px;
+            border-radius: 8px;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .spotify-track:active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .spotify-track.active {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .track-num-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .track-index {
+            font-size: 0.85rem;
+            color: #b3b3b3;
+            width: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .spotify-track.active .track-index {
+            color: #1db954;
+        }
+
+        .track-meta h3 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .spotify-track.active .track-meta h3 {
+            color: #1db954; /* Menyala Hijau saat lagu aktif */
+        }
+
+        .track-meta p {
+            font-size: 0.75rem;
+            color: #b3b3b3;
+            margin-top: 2px;
+        }
+
+        .track-duration {
+            font-size: 0.8rem;
+            color: #b3b3b3;
+        }
+
+        /* Progress Bar di Bagian Bawah Spotify Player */
+        .spotify-progress-section {
+            margin-top: 15px;
+            border-top: 1px solid #282828;
+            padding-top: 15px;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 4px;
+            background: #282828;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: #1db954; /* Hijau Khas Spotify */
+            width: 0%;
+            border-radius: 10px;
+            position: relative;
+            transition: width 0.1s linear;
+        }
+
+        /* Titik geser bundar (Spotify Handle Dot) */
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            background: #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            display: none;
+        }
+
+        /* Memunculkan titik geser saat progress bar disentuh/dihover */
+        .progress-container:hover .progress-bar::after,
+        .progress-container:active .progress-bar::after {
+            display: block;
+        }
+
+        /* Nonaktifkan efek animasi width bawaan agar geseran jari terasa instan dan tidak patah-patah */
+        .progress-bar.dragging {
+            transition: none !important;
+        }
+
+        .time-stamps {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #b3b3b3;
+            font-weight: 600;
+        }
+
+        /* ==================== STYLE BARU: MINI GAMES ==================== */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .game-card {
+            background: var(--white);
+            border: 1px solid #f1f5f9;
+            border-radius: 25px;
+            padding: 25px 15px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.01);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .game-card:active {
+            transform: scale(0.95);
+        }
+
+        .game-icon-wrapper {
+            width: 60px;
+            height: 60px;
+            border-radius: 20px;
+            background: var(--secondary);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            transition: 0.3s;
+        }
+
+        .game-card:hover .game-icon-wrapper {
+            background: var(--primary);
+            color: #ffffff;
+        }
+
+        .game-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .game-desc {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- ==================== TAG AUDIO SLIDESHOW ==================== -->
+    <audio id="slideshowMusic" loop>
+        <source src="https://files.catbox.moe/x88wgz.mp3" type="audio/mpeg">
+    </audio>
+
+<header class="top-header">
+    <!-- Tombol Garis Tiga -->
+    <div class="header-menu-btn" onclick="toggleMenu()">
+        <i class="fa-solid fa-bars"></i>
+    </div>
+    <!-- Area Logo Ai -->
+    <div class="header-logo">
+        <img src="https://i.postimg.cc/YCqV8zZ9/pixellab-2026-06-28T08-16-01Z.png" class="logo-img" alt="Logo">
+    </div>
+</header>
+
+    <!-- MENU LACI GESER (SLIDE IN DARI KIRI) -->
+    <div id="menu-overlay" onclick="toggleMenu()">
+        <div class="menu-drawer" onclick="event.stopPropagation()">
+            <div class="menu-drawer-header">
+                <h3>Menu Eksklusif</h3>
+                <div class="close-drawer" onclick="toggleMenu()">&times;</div>
+            </div>
+            <ul class="menu-links">
+                <!-- Home (p1) -->
+                <li><a href="javascript:void(0)" onclick="selectMenu('p1')"><span><i class="fa-solid fa-house"></i> Home</span></a></li>
+                
+                <!-- Portofolio diarahkan ke halaman Moment (p4) -->
+                <li><a href="portofolio.html"><span><i class="fa-solid fa-camera-retro"></i> Highlight</span></a></li>
+                
+                <!-- Daftar Isi dengan dropdown lipat -->
+                <li>
+                    <a href="javascript:void(0)" onclick="toggleSubmenu()">
+                        <span><i class="fa-solid fa-list-ol"></i> Daftar Isi</span>
+                        <i class="fa-solid fa-chevron-down" id="submenu-arrow" style="font-size: 0.7rem; transition: 0.3s;"></i>
+                    </a>
+                    <ul class="submenu-list" id="submenu-item">
+                        <li><a href="javascript:void(0)" onclick="selectMenu('p1')">Home</a></li>
+                        <li><a href="javascript:void(0)" onclick="selectMenu('p_music')">Music Player</a></li>
+                        <li><a href="javascript:void(0)" onclick="selectMenu('p_games')">Mini Games</a></li>
+                        <li><a href="javascript:void(0)" onclick="selectMenu('p4')">Snapshots</a></li>
+                        
+                    </ul>
+                </li>
+                
+                <!-- Login diarahkan ke halaman Secret (p6) -->
+                <li><a href="javascript:void(0)" onclick="selectMenu('p6')"><span><i class="fa-solid fa-key"></i> Login</span></a></li>
+                
+                <!-- Credit memicu Pop-Up Modal -->
+                <li><a href="credit.html"><span><i class="fa-solid fa-circle-info"></i> Credit</span></a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- POP-UP DIALOG BOX CREDIT -->
+    <div id="credit-modal" onclick="closeCreditModal()">
+        <div class="credit-box" onclick="event.stopPropagation()">
+            <i class="fa-solid fa-heart" style="font-size: 2.5rem; color: #fb7185; margin-bottom: 15px;"></i>
+            <h3>Created by Rein</h3>
+            <p>Situs kenangan spesial ini dirancang khusus untuk memperingati ulang tahun Dwi Anggraini yang ke-25.<br><br>Zutto issho ni iyou!</p>
+            <button class="btn-main" onclick="closeCreditModal()" style="padding: 12px; margin-top:0;">Tutup</button>
+        </div>
+    </div>
+
+    <!-- Tab Bar Navigation dengan Icon & Teks (Telah Diperbarui Sesuai Request) -->
+    <nav>
+        <a href="javascript:void(0)" onclick="showPage('p1')" id="nav-p1" class="active"><i class="fa-solid fa-house"></i><span>Home</span></a>
+        <a href="javascript:void(0)" onclick="showPage('p_music')" id="nav-p_music"><i class="fa-solid fa-music"></i><span>Music</span></a>
+        <a href="javascript:void(0)" onclick="showPage('p_games')" id="nav-p_games"><i class="fa-solid fa-gamepad"></i><span>Games</span></a>
+        <a href="javascript:void(0)" onclick="showPage('p4')" id="nav-p4"><i class="fa-solid fa-camera-retro"></i><span>Moment</span></a>
+        <a href="javascript:void(0)" onclick="showPage('p6')" id="nav-p6"><i class="fa-solid fa-key"></i><span>Secret</span></a>
+    </nav>
+
+    <!-- HALAMAN 1: HOME -->
+    <div id="p1" class="page active">
+        <div class="header" data-aos="fade-down">
+           <span class="sub-title-hb">HAPPY BIRTHDAY</span>
+            <h1>DWI ANGGRAINI<br><span>ドウィ　アングライニ</span></h1>
+        </div>
+        <div class="img-box" style="background-image: url('https://i.postimg.cc/Dymq00MX/Blue-Simple-Happy-Birthday-Instagram-Post.png');"></div>
+        <div class="card" data-aos="fade-up">
+            <h3 style="margin-bottom: 10px;">お誕生日おめでとう御座います</h3>
+            <p style="color: #64748b; line-height: 1.7;">
+           これからも えがお で。</p>
+        </div>
+        <div class="card" style="background: var(--primary); color: white;">
+            <p style="font-weight: 600;">"Semoga selalu sehat, panjang umur, bahagia, dan semua doa serta harapan yang terbaik bisa segera terwujud. Selamat menikmati hari spesialmu. Semoga tahun ini membawa banyak kebahagiaan. 🎂✨."</p>
+        </div>
+    </div>
+
+    <!-- HALAMAN BARU: MUSIC PLAYER (p_music) - REVISI PLAYLIST SPOTIFY STYLE -->
+    <div id="p_music" class="page">
+        <div class="header">
+            <span class="section-title">Music Station</span>
+            <h1>Spotify <br><span>Playlist.</span></h1>
+        </div>
+
+        <!-- Pemutar Bergaya Playlist Spotify -->
+        <div class="spotify-container">
+            <div class="spotify-header">
+                <div class="spotify-art"></div>
+                <div class="spotify-info">
+                    <h2>Ai's Birthday Music</h2>
+                    <p>Playlist oleh Rein • 4 Lagu</p>
+                </div>
+            </div>
+
+            <!-- Kontrol Aksi Utama -->
+            <div class="spotify-actions">
+                <div class="spotify-btn-group">
+    <!-- Tambahkan id, style cursor, dan onclick -->
+    <i class="fa-regular fa-heart" id="spotify-heart" style="cursor: pointer; transition: 0.2s;" onclick="toggleLike()"></i>
+    <i class="fa-solid fa-arrow-down-to-bracket"></i>
+    <!-- Tambahkan style cursor dan onclick -->
+    <i class="fa-solid fa-ellipsis" style="cursor: pointer;" onclick="showPlaylistInfo()"></i>
+</div>
+                <!-- Tombol Play Bulat Hijau Khas Spotify -->
+                <button class="spotify-play-btn" onclick="togglePlayerMusic()">
+                    <i class="fa-solid fa-play" id="btn-player-play-icon"></i>
+                </button>
+            </div>
+
+            <!-- Daftar Playlist (4 Lagu) -->
+            <div class="spotify-tracklist">
+                <!-- Lagu 1 (Aktif BGM Utama) -->
+                <div class="spotify-track active" onclick="selectTrack(0)" id="track-0">
+                    <div class="track-num-title">
+                        <span class="track-index">1</span>
+                        <div class="track-meta">
+                            <h3>Selamat ulang tahun ver:anak</h3>
+                            <p>Special Playlist for Dwi Anggraini</p>
+                        </div>
+                    </div>
+                    <span class="track-duration">03:27</span>
+                </div>
+
+                <!-- Lagu 2 (Placeholder - Bisa diganti tautannya nanti) -->
+                <div class="spotify-track" onclick="selectTrack(1)" id="track-1">
+                    <div class="track-num-title">
+                        <span class="track-index">2</span>
+                        <div class="track-meta">
+                            <h3>舟津真翔一目惚れ Hitomebore</h3>
+                            <p>舟津真翔 Funatsu Manato</p>
+                        </div>
+                    </div>
+                    <span class="track-duration">03:25</span>
+                </div>
+
+                <!-- Lagu 3 (Placeholder - Bisa diganti tautannya nanti) -->
+                <div class="spotify-track" onclick="selectTrack(2)" id="track-2">
+                    <div class="track-num-title">
+                        <span class="track-index">3</span>
+                        <div class="track-meta">
+                            <h3>Nothing's gonna change my love</h3>
+                            <p>George Benson</p>
+                        </div>
+                    </div>
+                    <span class="track-duration">04:03</span>
+                </div>
+
+                <!-- Lagu 4 (Placeholder - Bisa diganti tautannya nanti) -->
+                <div class="spotify-track" onclick="selectTrack(3)" id="track-3">
+                    <div class="track-num-title">
+                        <span class="track-index">4</span>
+                        <div class="track-meta">
+                            <h3>恋色-Koiiro</h3>
+                            <p>もさを MOSAWO</p>
+                        </div>
+                    </div>
+                    <span class="track-duration">04:50</span>
+                </div>
+            </div>
+
+            <!-- Progress Bar Terintegrasi -->
+            <div class="spotify-progress-section">
+                <div class="progress-container" id="player-progress-container">
+                    <div class="progress-bar" id="player-progress-bar"></div>
+                </div>
+                <div class="time-stamps">
+                    <span id="player-current-time">00:00</span>
+                    <span id="player-duration">00:00</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="border-left: 5px solid #1db954; background: #ffffff;">
+            <p style="font-style: italic; color: #64748b; font-size: 0.85rem;">
+                "Ketuk salah satu lagu di atas untuk memutar. Kamu bisa menyesuaikan pilihan yang kamu putar"
+            </p>
+        </div>
+    </div>
+
+    <!-- HALAMAN BARU: MINI GAMES (p_games) - DENGAN KONFIRMASI POP-UP -->
+    <div id="p_games" class="page">
+        <div class="header">
+            <span class="section-title">Play Corner</span>
+            <h1>Mini <br><span>Games.</span></h1>
+        </div>
+
+        <div class="game-grid">
+            <!-- KARTU GAME 1 (Hubungkan dengan Fungsi Konfirmasi) -->
+            <div onclick="confirmGame('game1.html', 'Ai puzzle')" class="game-card">
+                <div class="game-icon-wrapper">
+                    <i class="fa-solid fa-puzzle-piece"></i>
+                </div>
+                <div class="game-title">Ai Puzzle</div>
+                <div class="game-desc">Bermain susun gambar hingga tersusun</div>
+            </div>
+
+            <!-- KARTU GAME 2 (Hubungkan dengan Fungsi Konfirmasi) -->
+            <div onclick="confirmGame('game2.html', 'Ai Brain Match')" class="game-card">
+                <div class="game-icon-wrapper">
+                    <i class="fa-solid fa-brain"></i>
+                </div>
+                <div class="game-title">Ai Brain Match</div>
+                <div class="game-desc">Adu ingatan tebak kartu yang cemerlang</div>
+            </div>
+
+            <!-- KARTU GAME 3 (Hubungkan dengan Fungsi Konfirmasi) -->
+            <div onclick="confirmGame('game3.html', 'AI TTS')" class="game-card">
+                <div class="game-icon-wrapper">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </div>
+                <div class="game-title">Ai TTS</div>
+                <div class="game-desc">Teka teki silang dengan pengetahuan umum</div>
+            </div>
+
+            <!-- KARTU GAME 4 (Hubungkan dengan Fungsi Konfirmasi) -->
+            <div onclick="confirmGame('game4.html', 'Space Ranger')" class="game-card">
+                <div class="game-icon-wrapper">
+                    <i class="fa-solid fa-hashtag"></i>
+                </div>
+                <div class="game-title">Ai Tic-Tac-Toe</div>
+                <div class="game-desc">Game klasik Silang bulat melawan taktik</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HALAMAN 4: MOMENT (Gallery) -->
+    <div id="p4" class="page">
+        <div class="header">
+            <span class="section-title">Snapshots</span>
+            <h1>Through <br><span>The Lens.</span></h1>
+        </div>
+        <div class="img-box" style="background-image: url('https://i.postimg.cc/xdJZ6LQH/foto2.jpg'); width:380px; height: 450px;"></div>
+        <div class="img-box" style="background-image: url('https://i.postimg.cc/jjpFmCqm/foto4.jpg'); height: 280px;"></div>
+        <div class="img-box" style="background-image: url('https://i.postimg.cc/63CmXwy5/foto7.avif'); width:380 height: 450px;"></div>
+        <p style="text-align: center; color: #94a3b8; font-size: 0.8rem;">Every photo has a story to tell.</p>
+    </div>
+
+    <!-- HALAMAN 6: SECRET (Wish) -->
+    <div id="p6" class="page">
+        <div id="login-overlay">
+            <div style="text-align: center; padding-top: 50px;">
+                <i class="fa-solid fa-lock" style="font-size: 3.5rem; color: var(--primary); margin-bottom: 20px;"></i>
+                <h2>Private Message</h2>
+                <p style="color: #64748b; margin-top: 10px; font-size: 0.9rem;">Masukkan Tanggal Lahir (DDMMYYYY)</p>
+                <input type="password" id="passInput" style="width: 100%; padding: 20px; border-radius: 20px; border: 2px solid var(--secondary); margin: 30px 0; text-align: center; font-size: 1.2rem; outline: none;">
+                <button onclick="checkPass()" class="btn-main">BUKA PESAN</button>
+            </div>
+        </div>
+
+        <div id="wish-content" style="display: none;">
+            <div class="header">
+                <h1>Happy <br><span>Birthday, Ai.</span></h1>
+            </div>
+            <div class="card">
+                <p style="line-height: 2; color: #475569;">
+                    Selamat ulang tahun yang ke 25, My ai💖. <br><br>
+                    Semoga ayang suka sama yang aku buat ini. sederhana, tapi di balik setiap bagiannya ada waktu, usaha, dan rasa yang aku kasih buat ayang. Selamat menikmati hari spesial ayang.🎂✨ <br><br>
+                    Semoga juga ayang makin bahagia, makin dilancarkan segala urusannya, dan pastinya makin sayang sama aku. Aku bakal selalu dukung kamu di sini, hari ini, besok, dan selamanya. <br><br>
+                    <b>I love you 1万.</b>
+                </p>
+                <h2 style="margin-top: 40px; font-family: 'Noto Serif JP', serif; color: var(--primary);">愛してる</h2>
+                <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 10px;">ずっと一緒によう</p>
+            </div>
+<div class="img-box" style="background-image: url('https://i.postimg.cc/vZ4DBj4r/565A1944-81EF-41D8-ABF8-3007E542ED83.jpg'); width:380px; height: 720px;"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({ duration: 800, once: true });
+
+        const music = document.getElementById("slideshowMusic");
+
+        // Metadata 4 Lagu Playlist Spotify
+        const playlist = [
+            {
+                title: "Selamat ulang tahun ver:anak",
+                artist: "Special Playlist for Dwi Anggraini",
+                src: "https://files.catbox.moe/x88wgz.mp3",
+                startTime: 0
+            },
+            {
+                title: "舟津真翔-一目惚れ",
+                artist: "舟津真翔　Funatsu Manato",
+                src: "https://files.catbox.moe/x8n6ix.mp3", // Tautan default (bisa diubah nanti)
+                startTime: 0
+            },
+            {
+                title: "Nothing's gonna change my love",
+                artist: "George Benson",
+                src: "https://files.catbox.moe/7htulv.mp3", // Tautan default (bisa diubah nanti)
+                startTime: 0
+            },
+            {
+                title: "恋色-Koiiro",
+                artist: "もさを　MOSAWO",
+                src: "https://files.catbox.moe/d0dvip.mp3", // Tautan default (bisa diubah nanti)
+                startTime: 0
+            }
+        ];
+
+        let activeTrackIndex = 0;
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+            
+            document.getElementById(pageId).classList.add('active');
+            document.getElementById('nav-' + pageId).classList.add('active');
+            
+            window.scrollTo(0,0);
+        }
+
+        function checkPass() {
+            const val = document.getElementById('passInput').value;
+            if(val === "26072001") {
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('wish-content').style.display = 'block';
+            } else {
+                alert("Salah, Ai! Coba ingat lagi ya.");
+            }
+        }
+
+        /* --- SCRIPT FUNGSI HAMBURGER MENU & MODAL --- */
+        function toggleMenu() {
+            const overlay = document.getElementById('menu-overlay');
+            if (overlay) {
+                if (overlay.classList.contains('active')) {
+                    overlay.classList.remove('active');
+                    setTimeout(() => { overlay.style.display = 'none'; }, 400);
+                } else {
+                    overlay.style.display = 'block';
+                    void overlay.offsetWidth; // Memicu perbaikan render browser
+                    overlay.classList.add('active');
+                }
+            }
+        }
+
+        function toggleSubmenu() {
+            const submenu = document.getElementById('submenu-item');
+            const arrow = document.getElementById('submenu-arrow');
+            if (submenu) {
+                submenu.classList.toggle('open');
+                if (submenu.classList.contains('open')) {
+                    arrow.style.transform = 'rotate(180deg)';
+                } else {
+                    arrow.style.transform = 'rotate(0deg)';
+                }
+            }
+        }
+
+        function selectMenu(pageId) {
+            showPage(pageId);
+            toggleMenu(); // Menutup sidebar laci otomatis setelah berpindah halaman
+        }
+
+        function showCreditModal() {
+            toggleMenu(); // Tutup laci geser terlebih dahulu
+            const modal = document.getElementById('credit-modal');
+            if (modal) {
+                modal.style.display = 'flex';
+                void modal.offsetWidth;
+                modal.classList.add('active');
+            }
+        }
+
+        function closeCreditModal() {
+            const modal = document.getElementById('credit-modal');
+            if (modal) {
+                modal.classList.remove('active');
+                setTimeout(() => { modal.style.display = 'none'; }, 400);
+            }
+        }
+
+        // A. Fungsi klik manual untuk Play / Pause musik utama
+        function toggleMusic() {
+            const container = document.getElementById("music-container");
+            const icon = document.getElementById("music-play-icon");
+            
+            if (music.paused) {
+                music.play().then(() => {
+                    if(container) {
+                        container.classList.remove("paused");
+                        container.classList.add("playing");
+                    }
+                    if(icon) icon.className = "fa-solid fa-pause";
+                    updatePlayerUI();
+                }).catch(err => {
+                    console.log("Pemutaran otomatis diblokir sistem browser: ", err);
+                });
+            } else {
+                music.pause();
+                if(container) {
+                    container.classList.remove("playing");
+                    container.classList.add("paused");
+                }
+                if(icon) icon.className = "fa-solid fa-play";
+                updatePlayerUI();
+            }
+        }
+
+        // B. Sinkronisasi Logika Music Player
+        function togglePlayerMusic() {
+            toggleMusic();
+        }
+
+        function seekBack() {
+            music.currentTime = Math.max(0, music.currentTime - 10);
+        }
+
+        function seekForward() {
+            music.currentTime = Math.min(music.duration || 0, music.currentTime + 10);
+        }
+
+        // Fungsi mengganti lagu pada Playlist Spotify
+        function selectTrack(trackIndex) {
+            if (trackIndex === activeTrackIndex) {
+                toggleMusic();
+                return;
+            }
+
+            activeTrackIndex = trackIndex;
+
+            // Update Class Active di List Visual
+            document.querySelectorAll('.spotify-track').forEach((track, index) => {
+                if (index === trackIndex) {
+                    track.classList.add('active');
+                } else {
+                    track.classList.remove('active');
+                }
+            });
+
+            // Update Metadata Audio Element
+            const trackData = playlist[trackIndex];
+            music.src = trackData.src;
+            music.currentTime = trackData.startTime;
+            
+            // Putar otomatis lagu baru
+            music.play().then(() => {
+                updatePlayerUI();
+            }).catch(e => console.log("Gagal berganti lagu:", e));
+        }
+
+        // Sinkronisasi progress bar & ikon tombol
+        const progressBar = document.getElementById("player-progress-bar");
+        const progressContainer = document.getElementById("player-progress-container");
+        const currentTimeText = document.getElementById("player-current-time");
+        const durationText = document.getElementById("player-duration");
+        const playBtnIcon = document.getElementById("btn-player-play-icon");
+
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return "00:00";
+            const min = Math.floor(seconds / 60);
+            const sec = Math.floor(seconds % 60);
+            return (min < 10 ? "0" : "") + min + ":" + (sec < 10 ? "0" : "") + sec;
+        }
+
+        function updatePlayerUI() {
+            if (!music.paused) {
+                playBtnIcon.className = "fa-solid fa-pause";
+            } else {
+                playBtnIcon.className = "fa-solid fa-play";
+            }
+        }
+
+        // Memantau jalannya musik
+        music.addEventListener("timeupdate", () => {
+            const percent = (music.currentTime / music.duration) * 100;
+            progressBar.style.width = percent + "%";
+            currentTimeText.innerText = formatTime(music.currentTime);
+            durationText.innerText = formatTime(music.duration);
+        });
+
+        // Event listener saat metadata audio termuat
+        music.addEventListener("loadedmetadata", () => {
+            durationText.innerText = formatTime(music.duration);
+        });
+
+        // Memungkinkan user mengklik progress bar untuk melompati waktu musik
+        progressContainer.addEventListener("click", (e) => {
+            const coordStart = progressContainer.getBoundingClientRect().left;
+            const coordEnd = e.clientX;
+            const percent = (coordEnd - coordStart) / progressContainer.offsetWidth;
+            music.currentTime = percent * music.duration;
+        });
+
+        
+
+        // C. Fungsi Dialog Konfirmasi Masuk Game
+        function confirmGame(gameUrl, gameName) {
+            const isConfirmed = confirm("Apakah anda yakin ingin membuka game " + gameName + "?");
+            if (isConfirmed) {
+                window.location.href = gameUrl;
+            }
+        }
+// 1. Fungsi untuk menyalakan/mematikan tombol Love (Spotify Green)
+function toggleLike() {
+    const heart = document.getElementById("spotify-heart");
+    if (heart.classList.contains("fa-regular")) {
+        // Berubah menjadi hati penuh berwarna hijau spotify [1.1]
+        heart.className = "fa-solid fa-heart";
+        heart.style.color = "#1db954"; 
+    } else {
+        // Kembali menjadi hati kosong berwarna abu-abu bawaan [1.1]
+        heart.className = "fa-regular fa-heart";
+        heart.style.color = ""; 
+    }
+}
+
+// 2. Fungsi untuk memicu aksi tombol Titik Tiga [1.1]
+function showPlaylistInfo() {
+    alert("Playlist spesial ulang tahun Dwi Anggraini ");
+}
+    </script>
+</body>
+</html>

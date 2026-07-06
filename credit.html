@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ending Credits - Ai 25th Edition</title>
+    
+    <!-- Google Fonts & FontAwesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* --- CSS RESET & VARIABEL UTAMA --- */
+        :root {
+            --sky-bg: #bae6fd; 
+            --sky-accent: #38bdf8;
+            --sky-glow: rgba(56, 189, 248, 0.4);
+            --deep-navy: #000000; /* Menggunakan hitam pekat murni [1] */
+            --card-bg: rgba(15, 23, 42, 0.85);
+            --text-light: #f8fafc;
+            --gray-text: #94a3b8;
+            --gold-accent: #fbbf24;
+            --gold-glow: rgba(251, 191, 36, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--deep-navy); /* Hitam pekat murni [1] */
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- DESAIN BACKGROUND HITAM HIDUP (COSMIC DUST BREATHING EFFECT) --- [1] */
+        .cosmic-dust-1 {
+            position: fixed;
+            top: 20%; left: 10%;
+            width: 350px; height: 350px;
+            /* Transparansi sangat tipis (0.08) agar latar tetap gelap namun terasa hidup [1] */
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.08) 0%, transparent 70%);
+            animation: driftDust 20s infinite alternate ease-in-out;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .cosmic-dust-2 {
+            position: fixed;
+            bottom: 10%; right: 5%;
+            width: 450px; height: 450px;
+            /* Transparansi sangat tipis (0.06) [1] */
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.06) 0%, transparent 70%);
+            animation: driftDust 25s infinite alternate-reverse ease-in-out;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes driftDust {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, -30px) scale(1.1); }
+        }
+
+        /* --- LAYAR AWAL START --- */
+        #start-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: #000000;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 24px;
+            cursor: pointer;
+            transition: opacity 1s ease, visibility 1s;
+        }
+
+        .start-btn {
+            background: transparent;
+            border: 2px solid var(--sky-accent);
+            color: var(--sky-accent);
+            padding: 16px 36px;
+            border-radius: 40px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            box-shadow: 0 0 15px var(--sky-glow);
+            animation: pulseGlow 1.5s infinite alternate ease-in-out;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .start-btn-gold {
+            border-color: var(--gold-accent);
+            color: var(--gold-accent);
+            box-shadow: 0 0 15px var(--gold-glow);
+            animation: pulseGlowGold 1.5s infinite alternate ease-in-out;
+        }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(0.96); box-shadow: 0 0 5px var(--sky-glow); }
+            100% { transform: scale(1.04); box-shadow: 0 0 25px var(--sky-glow); }
+        }
+
+        @keyframes pulseGlowGold {
+            0% { transform: scale(0.96); box-shadow: 0 0 5px var(--gold-glow); }
+            100% { transform: scale(1.04); box-shadow: 0 0 25px var(--gold-glow); }
+        }
+
+        /* --- CONTAINER GULIR KREDIT (DRAG-SCROLLABLE) --- */
+        #credit-container {
+            width: 100vw;
+            height: 100vh;
+            overflow-y: hidden;
+            position: relative;
+            scrollbar-width: none; 
+            -ms-overflow-style: none;  
+            cursor: default;
+        }
+
+        #credit-container::-webkit-scrollbar {
+            display: none; 
+        }
+
+        #credit-container:active {
+            cursor: grabbing;
+        }
+
+        /* Area pembungkus konten di dalam agar memiliki ruang bernapas atas/bawah */
+        .credit-scroll-content {
+            padding-top: 105vh; /* Mulai guliran dari bawah layar */
+            padding-bottom: 30vh; /* Selesai di atas layar */
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 65px; /* Jarak seksi kredit diatur longgar */
+            /* Ditambahkan transisi penyeimbang yang mulus saat pemusatan akhir [1.1] */
+            transition: padding-top 1.5s cubic-bezier(0.25, 1, 0.5, 1), padding-bottom 1.5s cubic-bezier(0.25, 1, 0.5, 1), height 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* --- GAYA SEKSI KREDIT SINEMATIK --- */
+        .credit-section {
+            width: 100%;
+            padding: 0 20px;
+        }
+
+        .credit-title-role {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 8px;
+            text-shadow: 0 0 4px var(--sky-glow);
+        }
+
+        .credit-name-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-light);
+            line-height: 1.4;
+        }
+
+        .credit-sub-text {
+            font-size: 0.85rem;
+            color: var(--gray-text);
+            line-height: 1.6;
+            margin-top: 5px;
+            font-weight: 600;
+        }
+
+        /* --- GAYA KATEGORISASI ALAT & APLIKASI --- */
+        .category-group-box {
+            background: rgba(30, 41, 59, 0.25);
+            border: 1.5px solid rgba(56, 189, 248, 0.2);
+            border-radius: 20px;
+            padding: 20px 15px;
+            width: 100%;
+            max-width: 320px;
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .category-group-title {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 1.2px solid rgba(251, 191, 36, 0.25);
+            padding-bottom: 6px;
+            text-shadow: 0 0 4px var(--gold-glow);
+        }
+
+        .tool-row-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 8px;
+        }
+
+        .tool-row-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tool-row-left i {
+            font-size: 1.4rem;
+            color: var(--sky-accent);
+            filter: drop-shadow(0 0 4px var(--sky-glow));
+            width: 24px;
+            text-align: center;
+        }
+
+        .tool-row-left img {
+            height: 20px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .tool-name-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tool-role-label {
+            font-size: 0.7rem;
+            color: var(--gray-text);
+            font-weight: 600;
+        }
+
+        /* --- FINAL TRIBUTE LOGO ENDING --- */
+        .final-tribute-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 1px solid rgba(56, 189, 248, 0.15);
+            width: 90%;
+transition: border-color 1.5s ease;
+        }
+
+        .final-logos-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 25px;
+        }
+
+        .final-logos-row img {
+            height: 45px;
+            object-fit: contain;
+            filter: drop-shadow(0px 1px 3px rgba(56, 189, 248, 0.3));
+        }
+
+        .final-logos-row .divider {
+            width: 1.5px;
+            height: 25px;
+            background: rgba(255,255,255,0.2);
+        }
+
+        .thanks-message {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.35rem;
+            font-style: italic;
+            color: var(--gold-accent);
+            text-shadow: 0 0 6px var(--gold-glow);
+            margin-top: 10px;
+        }
+/* --- CSS Khusus Penyelaras Baris Musik --- */
+.music-row-item {
+    display: flex;
+    align-items: center; /* Memaksa semua elemen sejajar vertikal di tengah */
+    justify-content: space-between;
+    padding: 8px 6px;
+    border-bottom: 1.2px dashed rgba(56, 189, 248, 0.12); /* Garis pembatas halus antar lagu */
+    width: 100%;
+}
+
+.music-row-item:last-child {
+    border-bottom: none; /* Menghilangkan garis pembatas untuk lagu terakhir */
+}
+
+.music-name-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px; /* Batas aman lebar teks kiri di layar HP */
+    text-align: left;
+}
+
+.music-role-label {
+    font-size: 0.72rem;
+    color: var(--gray-text);
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px; /* Batas aman lebar teks kanan di layar HP */
+    text-align: right;
+}
+    </style>
+</head>
+<body>
+
+    <!-- Musik Latar Sukidakara -->
+    <audio id="bgm-music" loop>
+        <source src="sukidakara.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Ornamen Hitam Hidup Latar Belakang -->
+    <div class="cosmic-dust-1"></div>
+    <div class="cosmic-dust-2"></div>
+
+    <!-- 1. SCREEN AWAL START -->
+    <div id="start-overlay" onclick="startCredits()">
+        <button class="start-btn">BUKA CREDIT ➜</button>
+    </div>
+
+    <!-- 2. CONTAINER GULIR KREDIT UTAMA -->
+    <div id="credit-container">
+        <div class="credit-scroll-content">
+            
+            <!-- KONTEN GULIR UTAMA YANG AKAN DIHILANGKAN SECARA SINEMATIK DI AKHIR [1.1] -->
+            <div id="credit-body-content" style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 65px; transition: opacity 1.5s ease;">
+                
+                <!-- SEKSI 1: LOGO DWI ANGGRAINI & 25 TAHUN -->
+                <div class="credit-section">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px;">
+                        <img src="https://i.postimg.cc/YCqV8zZ9/pixellab-2026-06-28T08-16-01Z.png" alt="Ai Logo" style="height: 35px; filter: drop-shadow(0 0 5px var(--sky-glow));">
+                        <div style="width: 1.2px; height: 20px; background: rgba(255,255,255,0.3);"></div>
+                        <img src="https://i.postimg.cc/MTQPFPzr/Logo25.png" alt="Logo 25" style="height: 35px; filter: drop-shadow(0 0 5px var(--sky-glow));">
+                    </div>
+                    <h1 class="credit-name-text" style="font-size: 1.8rem; letter-spacing: -0.5px; text-transform: uppercase;">Happy Birthday<br>Dwi Anggraini</h1>
+                    <p class="credit-sub-text" style="letter-spacing: 2px;">SPECIAL TRIBUTE WEB EDITION</p>
+                </div>
+
+                <!-- SEKSI 2: LINIMASA PEMBUATAN (TIMELINE) -->
+                <div class="credit-section">
+                    <p class="credit-title-role">Mulai Tahap Konsep &amp; Coding</p>
+                    <p class="credit-name-text">12 Juni - 4 Juli 2026</p>
+                    <p class="credit-sub-text">Merumuskan konsep desain, bento-grid, dan logika pemutar musik terintegrasi.</p>
+                </div>
+
+                <div class="credit-section">
+                    <p class="credit-title-role">Tahap Quality Control (QC)</p>
+                    <p class="credit-name-text">Hingga 7 Juli 2026</p>
+                    <p class="credit-sub-text">Uji fungsionalitas, uji kendala visual, sinkronisasi waktu skipping lagu, dan pengujian kelancaran game di iOS.</p>
+                </div>
+
+                <div class="credit-section">
+                    <p class="credit-title-role">Upload &amp; Peluncuran Tautan Online</p>
+                    <p class="credit-name-text">8 Juli 2026</p>
+                    <p class="credit-sub-text">Website diupload dan resmi aktif mengudara secara publik dan siapapun bisa melihat website ini dengan QR code atau link.</p>
+                </div>
+
+                <!-- SEKSI 3: APRESIASI SUMBER DATA (THANKS TO) -->
+                <div class="credit-section">
+                    <p class="credit-title-role">Sumber Musik &amp; Audio</p>
+                    <p class="credit-name-text">YouTube</p>
+                    <p class="credit-sub-text">Terima kasih atas backsound dan musik official </p>
+                </div>
+
+                <div class="credit-section">
+                    <p class="credit-title-role">Aset Dokumentasi &amp; Foto</p>
+                    <p class="credit-name-text">Galeri Pribadi</p>
+                    <p class="credit-sub-text">Seluruh koleksi gambar dokumentasi kenangan selama berada di Jepang.</p>
+                </div>
+
+                <div class="credit-section">
+                    <p class="credit-title-role">Layanan Penyedia Font</p>
+                    <p class="credit-name-text">Google Fonts</p>
+                    <p class="credit-sub-text">Terima kasih atas font gratisnya.</p>
+                </div>
+                
+                <div class="credit-section">
+                    <p class="credit-title-role">Coding support</p>
+                    <p class="credit-name-text">Google Studio</p>
+                    <p class="credit-sub-text">Terima kasih asisten coding dan troubleshootnya.</p>
+                </div>
+
+                <!-- SEKSI 4: ALAT & APLIKASI BERDASARKAN KATEGORI -->
+                <div class="credit-section" style="display: flex; flex-direction: column; align-items: center;">
+                    <p class="credit-title-role">Peralatan &amp; Aplikasi</p>
+                    <p class="credit-name-text" style="font-size: 1.1rem; margin-bottom: 5px;">Teknologi Pendukung</p>
+                    <p class="credit-sub-text">Daftar lengkap perangkat keras, perangkat lunak, dan platform hosting yang dikategorikan secara mendetail.</p>
+                    
+                    <!-- Kategori 1: Core Web Technologies -->
+                    <div class="category-group-box">
+                        <div class="category-group-title">Core Web Technologies</div>
+                        <div class="tool-row-item">
+                            <div class="tool-row-left">
+                                <i class="fa-brands fa-html5" style="color: #e34c26;"></i>
+                                <span class="tool-name-label">HTML</span>
+                            </div>
+                            <span class="tool-role-label">Struktur Web</span>
+                        </div>
+                        <div class="tool-row-item">
+                            <div class="tool-row-left">
+                                <i class="fa-brands fa-css3-alt" style="color: #264de4;"></i>
+                                <span class="tool-name-label">CSS</span>
+                            </div>
+                            <span class="tool-role-label">Seni Gaya</span>
+                        </div>
+                        <div class="tool-row-item">
+                            <div class="tool-row-left">
+                                <i class="fa-brands fa-js" style="color: #f7df1e;"></i>
+                                <span class="tool-name-label">JavaScript</span>
+                            </div>
+                            <span class="tool-role-label">Logika Game<br>Script animasi</span>
+                        </div>
+                    </div>
+
+                    <!-- Kategori 2: Development Environment -->
+                    <div class="category-group-box">
+                        <div class="category-group-title">Development Environment</div>
+                        <div class="tool-row-item">
+                            <div class="tool-row-left">
+                                <i class="fa-solid fa-code" style="color: #38bdf8;"></i>
+                                <span class="tool-name-label">Koder iOS</span>
+                            </div>
+                            <span class="tool-role-label">Mobile IDE</span>
+                        </div>
+                        <div class="tool-row-item">
+                            <div class="tool-row-left">
+                                <i class="fa-brands fa-chrome" style="color: #4285f4;"></i>
+                                <span class="tool-name-label">Chrome Dev</span>
+                            </div>
+                            <span class="tool-role-label">Debugging</span>
+                        </div>
+                        <div class="tool-row-item">
+                            <div class="tool-row-left">
+                                <i class="fa-solid fa-laptop-code" style="color: #ea4335;"></i>
+                                <span class="tool-name-label">Google Studio</span>
+                            </div>
+                            <span class="tool-role-label">Code Testing</span>
+                        </div>
+                        <div class="tool-row-item">
+                            <div class="tool-row-left">
+                                <img src="https://img.icons8.com/color/512/notepad.png" alt="Notepad">
+                                <span class="tool-name-label">Notepad</span>
+                            </div>
+                            <span class="tool-role-label">Editor Backup</span>
+                        </div>
+                    </div>
+
+                    <!-- Kategori 3: Cloud & Hosting -->
+                    <div class="category-group-box">
+                        <div class="category-group-title">Hosting &amp; Storage</div>
+                        <div class="tool-row-item">
+                            <div class="tool-row-left">
+                                <i class="fa-brands fa-github" style="color: #fff;"></i>
+                                <span class="tool-name-label">GitHub</span>
+                            </div>
+                            <span class="tool-role-label">Version Control</span>
+                        </div>
+                        <div class="tool-row-item">
+                            <div class="tool-row-left">
+                                <svg viewBox="0 0 115 100" style="width: 14px; height: 14px; fill: white;">
+                                    <polygon points="57.5,0 115,100 0,100"/>
+                                </svg>
+                                <span class="tool-name-label" style="margin-left: 2px;">Vercel</span>
+                            </div>
+                            <span class="tool-role-label">Web Deploy</span>
+                        </div>
+                        <div class="tool-row-item">
+                            <div class="tool-row-left">
+                                <i class="fa-solid fa-cloud-arrow-up" style="color: #ec4899;"></i>
+                                <span class="tool-name-label">PostImages</span>
+                            </div>
+                            <span class="tool-role-label">Image Host</span>
+                        </div>
+                    </div>
+
+                    <!-- Kategori Baru: Audio & Media -->
+                    <div class="category-group-box">
+                        <div class="category-group-title">Audio &amp; Media</div>
+                        
+                        <!-- 1. Catbox.moe -->
+                        <div class="tool-row-item">
+                            <div class="tool-row-left">
+                                <i class="fa-solid fa-file-audio" style="color: #a855f7; filter: drop-shadow(0 0 4px rgba(168,85,247,0.3));"></i>
+                                <span class="tool-name-label">Catbox</span>
+                            </div>
+                            <span class="tool-role-label">Audio Host</span>
+                        </div>
+
+                        <!-- 2. YouTube -->
+                        <div class="tool-row-item">
+                            <div class="tool-row-left">
+                                <i class="fa-brands fa-youtube" style="color: #ff0000; filter: drop-shadow(0 0 4px rgba(255,0,0,0.3));"></i>
+                                <span class="tool-name-label">YouTube</span>
+                            </div>
+                            <span class="tool-role-label">Audio Source</span>
+                        </div>
+
+                        <!-- 3. YTMP3 Converter -->
+                        <div class="tool-row-item">
+                            <div class="tool-row-left">
+                                <i class="fa-solid fa-download" style="color: #10b981; filter: drop-shadow(0 0 4px rgba(16,185,129,0.3));"></i>
+                                <span class="tool-name-label">YTMP3 Converter</span>
+                            </div>
+                            <span class="tool-role-label">MP3 Downloader</span>
+                        </div>
+                    </div>
+
+                    <!-- Kategori 4: Graphics & Design -->
+                    <div class="category-group-box">
+                        <div class="category-group-title">Design &amp; Graphics</div>
+                        <div class="tool-row-item">
+                            <div class="tool-row-left">
+                                <img src="https://img.icons8.com/color/512/canva.png" alt="Canva">
+                                <span class="tool-name-label">Canva</span>
+                            </div>
+                            <span class="tool-role-label">UI &amp; Frame Design</span>
+                        </div>
+                        <div class="tool-row-item">
+                            <div class="tool-row-left">
+                                <i class="fa-solid fa-palette" style="color: #22c55e;"></i>
+                                <span class="tool-name-label">PixelLab</span>
+                            </div>
+                            <span class="tool-role-label">Vector Rendering</span>
+                        </div>
+                        <div class="tool-row-item">
+                            <div class="tool-row-left">
+                                <i class="fa-solid fa-font" style="color: #fbbf24;"></i>
+                                <span class="tool-name-label">Google Fonts</span>
+                            </div>
+                            <span class="tool-role-label font-label">Typography</span>
+                        </div>
+                        <div class="tool-row-item">
+                            <div class="tool-row-left">
+                                <i class="fa-solid fa-star-of-life" style="color: #10b981;"></i>
+                                <span class="tool-name-label">AOS Library</span>
+                            </div>
+                            <span class="tool-role-label">Web Animation</span>
+                        </div>
+                    </div>
+
+                    <!-- Kategori: Official Soundtrack / BGM -->
+                    <div class="category-group-box">
+                        <div class="category-group-title">Official Soundtrack / BGM</div>
+                        
+                        <!-- Lagu 1 -->
+                        <div class="music-row-item">
+                            <div class="tool-row-left">
+                                <i class="fa-solid fa-music" style="color: #38bdf8; filter: drop-shadow(0 0 4px var(--sky-glow));"></i>
+                                <span class="music-name-label">ハルカ - Haruka</span>
+                            </div>
+                            <span class="music-role-label">YOASOBI</span>
+                        </div>
+
+                        <!-- Lagu 2 -->
+                        <div class="music-row-item">
+                            <div class="tool-row-left">
+                                <i class="fa-solid fa-music" style="color: #38bdf8; filter: drop-shadow(0 0 4px var(--sky-glow));"></i>
+                                <span class="music-name-label">一目惚れ - Hitomebore</span>
+                            </div>
+                            <span class="music-role-label">Funatsu Manato</span>
+                        </div>
+
+                        <!-- Lagu 3 -->
+                        <div class="music-row-item">
+                            <div class="tool-row-left">
+                                <i class="fa-solid fa-music" style="color: #38bdf8; filter: drop-shadow(0 0 4px var(--sky-glow));"></i>
+                                <span class="music-name-label">My Love</span>
+                            </div>
+                            <span class="music-role-label">Westlife</span>
+                        </div>
+
+                        <!-- Lagu 4 -->
+                        <div class="music-row-item">
+                            <div class="tool-row-left">
+                                <i class="fa-solid fa-music" style="color: #38bdf8; filter: drop-shadow(0 0 4px var(--sky-glow));"></i>
+                                <span class="music-name-label">Sukidakara</span>
+                            </div>
+                            <span class="music-role-label">Yuika</span>
+                        </div>
+
+                        <!-- Lagu 5 -->
+                        <div class="music-row-item">
+                            <div class="tool-row-left">
+                                <i class="fa-solid fa-music" style="color: #38bdf8; filter: drop-shadow(0 0 4px var(--sky-glow));"></i>
+                                <span class="music-name-label">Nothing's Gonna Change<br>My love</span>
+                            </div>
+                            <span class="music-role-label">George Benson</span>
+                        </div>
+
+                        <!-- Lagu 6 -->
+                        <div class="music-row-item">
+                            <div class="tool-row-left">
+                                <i class="fa-solid fa-music" style="color: #38bdf8; filter: drop-shadow(0 0 4px var(--sky-glow));"></i>
+                                <span class="music-name-label">恋色 - Koiiro</span>
+                            </div>
+                            <span class="music-role-label">Mosawo</span>
+                        </div>
+
+                        <!-- Lagu 7 -->
+                        <div class="music-row-item">
+                            <div class="tool-row-left">
+                                <i class="fa-solid fa-music" style="color: #38bdf8; filter: drop-shadow(0 0 4px var(--sky-glow));"></i>
+                                <span class="music-name-label">Selamat Ulang Tahun<br>versi anak-anak</span>
+                            </div>
+                            <span class="music-role-label">Lagu Anak-Anak</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEKSI 5: PRODUSER & HAK CIPTA -->
+                <div class="credit-section">
+                    <p class="credit-title-role">Dibuat &amp; Diproduksi Oleh</p>
+                    <div style="margin-top: 15px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                        <img src="https://i.postimg.cc/W4vcpKpZ/logorein.png" alt="Rein Logo" style="height: 48px; filter: drop-shadow(0 0 5px var(--sky-glow));">
+                    </div>
+                    <p class="credit-sub-text">Seluruh pengembangan website, coding, logika script, game, perakitan, dan desain visual dikerjakan secara mandiri.</p>
+                </div>
+
+            </div> <!-- AKHIR DARI #credit-body-content [1.1] -->
+
+            <!-- SEKSI 6: FINAL TRIBUTE LOGO ENDING -->
+            <div class="final-tribute-box">
+                <div class="final-logos-row">
+                    <img src="https://i.postimg.cc/YCqV8zZ9/pixellab-2026-06-28T08-16-01Z.png" alt="Ai Logo">
+                    <div class="divider"></div>
+                    <img src="https://i.postimg.cc/MTQPFPzr/Logo25.png" alt="Logo 25">
+                    <div class="divider"></div>
+                    <img src="https://i.postimg.cc/W4vcpKpZ/logorein.png" alt="Rein Logo">
+                </div>
+                <p class="thanks-message">Thank you for being part of this journey.</p>
+                <p style="font-size: 8px; color: var(--gray-text); letter-spacing: 1px; text-transform: uppercase; margin-top: 15px;">© 2026 Team Rein • All Rights Reserved</p>
+                
+                <!-- REVISI: TOMBOL TUTUP KREDIT AKHIR (FADE IN DI TAHAP PALING AKHIR) [1] -->
+                <button id="btn-close-credits" class="start-btn start-btn-gold" style="display: none; opacity: 0; transition: opacity 1s ease, transform 0.2s; margin-top: 30px;" onclick="exitCredits()">TUTUP CREDIT</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- SCRIPT LOGIKA GULIR KREDIT INTERAKTIF -->
+    <script>
+        const container = document.getElementById("credit-container");
+        const bgm = document.getElementById("bgm-music");
+
+        // Pengaturan gulir otomatis desimal konstan (Durasi diperpendek menjadi 2 menit / 120 detik) [1]
+        let scrollSpeedPerMs = 0; 
+        let scrollTopPos = 0; // Variabel float penampung posisi presisi [1]
+        let isUserInteracting = false;
+        let resumeTimer = null;
+        let animationFrameId = null;
+        let lastTimestamp = 0;
+        let totalDistance = 0;
+        let isEndAnimationTriggered = false; // Bendera pengaman untuk transisi penutup akhir [1.1]
+
+        // Fungsi menghitung kecepatan gulir secara tepat agar durasi selesai dalam 2 menit (120 detik) [1]
+        function calculateSpeed() {
+            totalDistance = container.scrollHeight - container.clientHeight;
+            const totalDurationMs = 120000; // Mengubah durasi menjadi 120.000 milidetik (2 Menit) [1]
+            scrollSpeedPerMs = totalDistance / totalDurationMs;
+        }
+
+        // Fungsi memulai seluruh kredit & musik dari start overlay
+        function startCredits() {
+            const startOverlay = document.getElementById("start-overlay");
+            startOverlay.style.opacity = "0";
+            startOverlay.style.visibility = "hidden";
+
+            // Putar audio secara aman
+            if (bgm) {
+                bgm.currentTime = 0;
+                bgm.volume = 0.6; // Volume sedang
+                bgm.play().catch(e => console.log("Audio diblokir oleh browser:", e));
+            }
+
+            // Hitung kecepatan berdasarkan ukuran konten nyata sesaat setelah halaman aktif [1]
+            calculateSpeed();
+
+            // Jalankan loop gulir berbasis Delta Time [1]
+            lastTimestamp = performance.now();
+            animationFrameId = requestAnimationFrame(autoScrollLoop);
+        }
+
+        // Loop gulir utama berbasis Delta Time (60 FPS Mulus & Presisi) [1]
+        function autoScrollLoop(timestamp) {
+            if (!lastTimestamp) lastTimestamp = timestamp;
+            const dt = timestamp - lastTimestamp; // Selisih waktu antar frame [1]
+            lastTimestamp = timestamp;
+
+            if (container) {
+                if (!isUserInteracting) {
+                    // Update posisi desimal [1]
+                    scrollTopPos += scrollSpeedPerMs * dt;
+                    container.scrollTop = Math.round(scrollTopPos); // Salurkan dalam bilangan bulat [1]
+                } else {
+                    // Sinkronkan variabel desimal pelacak dengan posisi gulir manual pengguna [1]
+                    scrollTopPos = container.scrollTop;
+                }
+
+                // REVISI: DETEKSI TAHAP AKHIR UNTUK MEMUNCULKAN PENUTUP INDAH [1.1]
+                if (container.scrollTop >= totalDistance - 15 && !isEndAnimationTriggered) {
+                    isEndAnimationTriggered = true; // Kunci bendera agar tidak dipicu ganda [1.1]
+                    triggerCinematicEnding();
+                }
+            }
+
+            // Jalankan frame berikutnya jika belum selesai transisi akhir
+            if (!isEndAnimationTriggered || container.scrollTop < totalDistance - 15) {
+                animationFrameId = requestAnimationFrame(autoScrollLoop);
+            }
+        }
+
+        // FUNGSI ANIMASI BARU: MEMUDARKAN TEKS ATAS DAN MENAMPILKAN LOGO DI TENGAH [1.1]
+        function triggerCinematicEnding() {
+            const bodyContent = document.getElementById("credit-body-content");
+            const closeBtn = document.getElementById("btn-close-credits");
+
+            // Matikan fungsi scroll manual pengguna agar transisi aman tidak bergeser [1.1]
+            container.style.overflowY = "hidden"; 
+            isUserInteracting = true; 
+
+            if (bodyContent) {
+                // 1. Pudarkan seluruh teks di atas secara perlahan (transisi CSS 1.5 detik) [1.1]
+                bodyContent.style.opacity = "0";
+document.querySelector(".final-tribute-box").style.borderTopColor = "transparent";
+
+                setTimeout(() => {
+                    // 2. Hilangkan seksi atas dari ruang layout [1.1]
+                    bodyContent.style.display = "none";
+
+                    // 3. Ubah padding pembungkus agar seksi logo penutup mendarat sempurna tepat di tengah-tengah layar [1.1]
+                    const scrollContent = document.querySelector(".credit-scroll-content");
+                    if (scrollContent) {
+                        scrollContent.style.paddingTop = "0";
+                        scrollContent.style.paddingBottom = "0";
+                        scrollContent.style.height = "100vh";
+                        scrollContent.style.justifyContent = "center";
+                    }
+
+                    // 4. Setelah logo terpusat dengan indah, munculkan tombol Tutup Kredit emas secara lembut [1.1]
+                    if (closeBtn) {
+                        closeBtn.style.display = "inline-block";
+                        setTimeout(() => {
+                            closeBtn.style.opacity = "1";
+                        }, 50);
+                    }
+                }, 1500); // Sinkron dengan durasi transisi opasitas CSS (1.5 detik) [1.1]
+            }
+        }
+
+        // --- SISTEM DETEKSI GERAKAN DRAG / GESER MANUAL YANG KONSISTEN [1] ---
+        const startDrag = () => {
+            if (isEndAnimationTriggered) return; // Kunci interaksi jika sudah masuk tahap akhir [1.1]
+            isUserInteracting = true;
+            if (resumeTimer) clearTimeout(resumeTimer); 
+        };
+
+        const stopDrag = () => {
+            if (isEndAnimationTriggered) return;
+            if (resumeTimer) clearTimeout(resumeTimer);
+            resumeTimer = setTimeout(() => {
+                isUserInteracting = false;
+                lastTimestamp = performance.now(); 
+            }, 1200); 
+        };
+
+        
+
+        // Fungsi Keluar dan diarahkan ke home.html [1, 2.1]
+        function exitCredits() {
+            if (bgm) bgm.pause();
+            window.location.href = "home.html"; // Diarahkan kembali ke file home.html utama [1, 2.1]
+        }
+
+        function confirmExit() {
+            const isConfirmed = confirm("Apakah anda yakin ingin keluar dari halaman kredit?");
+            if (isConfirmed) {
+                exitCredits();
+            }
+        }
+    </script>
+</body>
+</html>

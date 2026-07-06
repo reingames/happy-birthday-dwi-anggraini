@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ai | For Ai Exclusive Edition</title>
+    
+    <!-- Link Font & Icon -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Noto+Serif+JP:wght@500;900&family=Sacramento&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* --- EFEK KILATAN CAHAYA PADA FOTO (SHINE) --- */
+        .photo-slide {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .photo-slide::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to right,
+                transparent,
+                rgba(255, 255, 255, 0.4),
+                transparent
+            );
+            transform: skewX(-25deg);
+            pointer-events: none;
+            z-index: 2200;
+        }
+
+        .shine-active::after {
+            animation: sweepLight 1.5s ease-out forwards;
+        }
+
+        @keyframes sweepLight {
+            0% { left: -150%; }
+            100% { left: 150%; }
+        }
+
+        :root {
+            --primary: #0ea5e9;
+            --text: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: #000; color: #fff; overflow: hidden; width: 100vw; height: 100vh; }
+
+        /* --- SCREEN AWAL --- */
+        #start-screen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            background: transparent;
+            text-align: center;
+            transition: 0.8s;
+        }
+
+        #start-screen h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 10px; }
+        #start-screen p { opacity: 0.7; letter-spacing: 2px; }
+        .credit-small { font-size: 0.6rem; letter-spacing: 4px; margin-top: 10px; opacity: 0.5; text-transform: uppercase; }
+
+        .btn-start {
+            margin-top: 30px;
+            padding: 15px 40px;
+            border-radius: 50px;
+            border: none;
+            font-weight: 800;
+            cursor: pointer;
+            background: white;
+            color: black;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            transition: 0.3s;
+        }
+
+        .btn-start:active {
+            transform: scale(0.95);
+        }
+
+        .text-exit { opacity: 0; transform: scale(1.4); filter: blur(20px); pointer-events: none; }
+
+        /* --- PINTU TRANSISI --- */
+        #door-l, #door-r {
+            position: fixed; top: 0; width: 50%; height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?q=80&w=1000&auto=format&fit=crop');
+            background-size: 200% 100%; background-repeat: no-repeat;
+            z-index: 9000; transition: transform 1.2s cubic-bezier(0.7, 0, 0.3, 1);
+        }
+        #door-l { left: 0; background-position: left; border-right: 0px solid rgba(255,255,255,0.3); }
+        #door-r { right: 0; background-position: right; border-left: 0px solid rgba(255,255,255,0.3); }
+        .doors-open #door-l { transform: translateX(-100%); }
+        .doors-open #door-r { transform: translateX(100%); }
+
+        /* --- SLIDESHOW AREA (Ditambahkan efek transisi opacity untuk fade hitam) --- */
+        #slideshow-wrapper {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #000; z-index: 1000;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 1.5s ease, opacity 0.5s ease;
+        }
+
+        .bg-wallpaper {
+            background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), 
+                              url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop') !important;
+            background-size: cover; background-position: center;
+        }
+
+        /* --- TYPOGRAPHY & PHOTOS --- */
+        .slide-content { 
+    display: none; 
+    width: 90%; 
+    text-align: center; 
+    color: white; 
+    position: relative; /* Ditambahkan */
+    z-index: 10;        /* Ditambahkan agar teks selalu berada di atas partikel */
+}
+        .typo-slide { font-size: 2.5rem; font-weight: 800; letter-spacing: -1px; opacity: 0; }
+        .animate-in { animation: typoIn 1.5s forwards; }
+        @keyframes typoIn {
+            0% { opacity: 0; transform: scale(0.9); filter: blur(10px); }
+            20%, 80% { opacity: 1; transform: scale(1); filter: blur(0); }
+            100% { opacity: 0; transform: scale(1.1); filter: blur(10px); }
+        }
+        .animate-stay { animation: typoStay 2s forwards; }
+        @keyframes typoStay {
+            0% { opacity: 0; transform: scale(0.9); filter: blur(10px); }
+            100% { opacity: 1; transform: scale(1); filter: blur(0); }
+        }
+
+        /* Efek Light Saber Nama */
+        .active-saber { display: flex !important; flex-direction: column; align-items: center; justify-content: center; }
+        
+        #s-name {
+            width: 100%; height: 100%;
+            display: none; flex-direction: column;
+            align-items: center; justify-content: center;
+            background: #000; position: relative;
+        }
+
+        #s-name.active-saber { display: flex !important; }
+
+        /* --- KINETIC TYPOGRAPHY STYLE --- */
+        .typo-box {
+            position: relative;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 900;
+            font-size: 3rem;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            line-height: 1;
+        }
+
+        .name-slice {
+            position: absolute;
+            top: 0; left: 0; width: 100%;
+            display: block;
+        }
+
+        .slice-top {
+            clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);
+            animation: splitTop 12s ease-in-out infinite;
+        }
+
+        .slice-bottom {
+            clip-path: polygon(0 50%, 100% 50%, 100% 100%, 0 100%);
+            animation: splitBottom 12s ease-in-out infinite;
+        }
+
+        @keyframes splitTop {
+            0% { transform: translateX(-50px); opacity: 0; }
+            20% { transform: translateX(0); opacity: 1; }
+            40% { transform: translateX(5px); }
+            60% { transform: translateX(-5px); }
+            80% { transform: translateX(0); }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes splitBottom {
+            0% { transform: translateX(50px); opacity: 0; }
+            20% { transform: translateX(0); opacity: 1; }
+            40% { transform: translateX(-5px); }
+            60% { transform: translateX(5px); }
+            80% { transform: translateX(0); opacity: 1; }
+        }
+
+        .saber-line {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0; height: 3px;
+            background: #fff;
+            box-shadow: 0 0 20px 5px #0ea5e9, 0 0 40px 10px #0ea5e9;
+            z-index: 5;
+            border-radius: 10px;
+            animation: saberExpand 1.5s 0.5s forwards;
+        }
+
+        @keyframes saberExpand {
+            to { width: 130%; }
+        }
+
+        .glow-on {
+            text-shadow: 0 0 15px rgba(14, 165, 233, 0.8);
+            transition: 2s;
+        }
+
+        /* Ganti gaya transisi foto lama Anda dengan ini agar gambar bergerak lambat secara konstan */
+.photo-slide img { 
+    width: 100%; 
+    max-width: 400px; 
+    border-radius: 15px; 
+    opacity: 0; 
+    transform: scale(1.15) rotate(1deg); /* Mulai dari agak besar dan sedikit miring */
+    transition: transform 10s linear, opacity 1.5s ease; /* Durasi transform dibuat 10 detik agar bergerak konstan */
+}
+.photo-in { 
+    opacity: 1 !important; 
+    transform: scale(1) rotate(0deg) !important; /* Bergerak mengecil perlahan selama 10 detik */
+}
+
+        /* --- FLASH EFFECT --- */
+        #flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 11000; opacity: 0; pointer-events: none; }
+        .flashing { animation: flashAnim 0.8s; }
+        @keyframes flashAnim { 0% { opacity: 0.5; } 100% { opacity: 0; } }
+
+        ruby rt { font-size: 0.35em; color: #0ea5e9; ruby-position: under; }
+
+        /* --- GAYA KHUSUS TOMBOL TRANSISI KINETIK --- */
+        #s-next-btn {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        #s-next-btn.active-btn {
+            display: flex !important;
+        }
+
+/* --- GAYA PARTIKEL BOKEH MELAYANG (CSS ONLY & iOS SAFE) --- */
+.particles-container {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    overflow: hidden;
+    z-index: 1; /* Berada di belakang teks/foto utama */
+    pointer-events: none;
+}
+
+.particle {
+    position: absolute;
+    /* Efek blur alami menggunakan gradasi warna tanpa filter blur agar GPU iPhone ringan */
+    background: radial-gradient(circle, rgba(14, 165, 233, 0.25) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+}
+
+/* Variasi ukuran, warna, posisi awal, dan kecepatan gerak masing-masing partikel */
+.p1 { width: 80px; height: 80px; left: 10%; bottom: -100px; animation: floatUp 15s infinite linear; }
+.p2 { width: 120px; height: 120px; left: 75%; bottom: -150px; background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%); animation: floatUp 22s infinite linear; animation-delay: -5s; }
+.p3 { width: 60px; height: 60px; left: 40%; bottom: -80px; animation: floatUp 12s infinite linear; animation-delay: -2s; }
+.p4 { width: 100px; height: 100px; left: 85%; bottom: -120px; animation: floatUp 18s infinite linear; animation-delay: -8s; }
+.p5 { width: 70px; height: 70px; left: 25%; bottom: -90px; background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%); animation: floatUp 16s infinite linear; animation-delay: -4s; }
+.p6 { width: 140px; height: 140px; left: 50%; bottom: -160px; animation: floatUp 26s infinite linear; animation-delay: -12s; }
+
+/* Animasi melayang naik ke atas secara perlahan */
+@keyframes floatUp {
+    0% {
+        transform: translateY(0) scale(0.8) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.8; /* Memudar masuk perlahan di awal jalan */
+    }
+    90% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(-110vh) scale(1.2) rotate(360deg);
+        opacity: 0; /* Memudar hilang saat mencapai puncak layar */
+    }
+}
+    </style>
+</head>
+<body>
+
+<div id="flash"></div>
+
+<div id="door-l"></div>
+<div id="door-r"></div>
+
+<audio id="slideshowMusic" loop>
+    <source src="https://files.catbox.moe/magaqi.mp3" type="audio/mpeg">
+</audio>
+
+<div id="start-screen">
+    <h1>For Ai</h1>
+    <p>EXCLUSIVE EDITION</p>
+    <p class="credit-small">BY REIN</p>
+    <button class="btn-start" onclick="startExperience()">Open Experience</button>
+</div>
+
+<!-- Konten Slideshow -->
+<div id="slideshow-wrapper">
+<!-- KONTENER PARTIKEL BOKEH MELAYANG -->
+<div class="particles-container">
+    <div class="particle p1"></div>
+    <div class="particle p2"></div>
+    <div class="particle p3"></div>
+    <div class="particle p4"></div>
+    <div class="particle p5"></div>
+    <div class="particle p6"></div>
+</div>
+    <div class="slide-content" id="s1"><h1 class="typo-slide">HAPPY<br>BIRTHDAY</h1></div>
+    <div class="slide-content" id="s2"><h1 class="typo-slide">SELAMAT<br>ULANG TAHUN</h1></div>
+    <div class="slide-content" id="s3"><h1 class="typo-slide"><ruby>誕生日<rt>たんじょうび</rt></ruby>おめでとう</h1></div>
+    
+    <div class="slide-content" id="s-name">
+        <div class="typo-box" id="name-container">
+            <div class="saber-line"></div>
+            <span class="name-slice slice-top">Dwi Anggraini</span>
+            <span class="name-slice slice-bottom">Dwi Anggraini</span>
+            <span style="opacity: 0;">Dwi Anggraini</span>
+        </div>
+    </div>
+
+    <div class="slide-content photo-slide" id="s4"><img src="https://i.postimg.cc/BnZc2ySh/Birthday.png"></div>
+    <div class="slide-content photo-slide" id="s5"><img src="https://i.postimg.cc/YC2fQVrn/Untitled-design.png"></div>
+
+    <!-- TAMPILAN KHUSUS UNTUK TOMBOL LANJUTKAN KE HALAMAN 3D -->
+    <div class="slide-content" id="s-next-btn">
+        <p style="margin-bottom: 25px; font-size: 1.1rem; opacity: 0.8; letter-spacing: 2px;">eitss.. Ini masih permulaan...</p>
+        <button class="btn-start" onclick="goTo3D()" style="margin-top: 0;">Lanjutkan</button>
+    </div>
+</div>
+
+<script>
+    const music = document.getElementById("slideshowMusic");
+
+    function startExperience() {
+        document.getElementById('start-screen').classList.add('text-exit');
+        
+        setTimeout(() => {
+            document.body.classList.add('doors-open');
+            try {
+                music.currentTime = 50;
+                music.volume = 0;
+                music.play().then(() => {
+                    let vol = 0;
+                    let fade = setInterval(() => {
+                        if (vol < 1) { vol += 0.05; music.volume = vol; }
+                        else clearInterval(fade);
+                    }, 100);
+                }).catch(err => console.log("Audio autoplay blocked by browser policy"));
+            } catch (e) {
+                console.log("Audio play error handled safely.");
+            }
+        }, 300);
+
+        setTimeout(() => {
+            document.getElementById('start-screen').style.display = 'none';
+            playSlideshow();
+        }, 1000);
+    }
+
+    function playSlideshow() {
+        const flash = document.getElementById('flash');
+        const wrapper = document.getElementById('slideshow-wrapper');
+        
+        // Timeline dibatasi sampai kemunculan tombol saja
+        let timeline = [
+            { id: 's1', delay: 500 },
+            { id: 's2', delay: 2000 },
+            { id: 's3', delay: 3500 },
+            { id: 's-name', delay: 5000 },
+            { id: 's4', delay: 10000 },
+            { id: 's5', delay: 17000 },
+            { id: 's-next-btn', delay: 27000 }
+        ];
+
+        timeline.forEach((item, index) => {
+            setTimeout(() => {
+                if(flash) {
+                    flash.classList.add('flashing');
+                    setTimeout(() => flash.classList.remove('flashing'), 800);
+                }
+
+                document.querySelectorAll('.slide-content').forEach(s => {
+                    s.style.display = 'none';
+                    s.classList.remove('active-saber');
+                    s.classList.remove('active-btn');
+                });
+
+                if (index === 4 || index === 5) wrapper.classList.add('bg-wallpaper');
+                else wrapper.classList.remove('bg-wallpaper');
+
+                let el = document.getElementById(item.id);
+                if(el) {
+                    if(index < 3) {
+                        el.style.display = 'block';
+                        el.querySelector('h1').classList.add('animate-in');
+                    }
+                    else if(index === 3) {
+                        el.classList.add('active-saber');
+                        setTimeout(() => {
+                            const container = document.getElementById('name-container');
+                            if(container) container.classList.add('glow-on');
+                        }, 5000);
+                    }
+                    else if(index === 4 || index === 5) {
+                        el.style.display = 'block';
+                        el.classList.remove('shine-active');
+                        void el.offsetWidth;
+                        el.classList.add('shine-active');
+                        setTimeout(() => el.querySelector('img').classList.add('photo-in'), 50);
+                    }
+                    else if(index === 6) {
+                        // Tampilkan tombol Lanjutkan
+                        el.classList.add('active-btn');
+                    }
+                }
+            }, item.delay);
+        });
+    }
+
+    // Navigasi ke Halaman 3D dengan Efek Fade Hitam Tanpa Mematikan Musik
+    function goTo3D() {
+        const wrapper = document.getElementById('slideshow-wrapper');
+
+        // Wrapper meredup halus ke hitam (mengikuti gaya latar belakang gelap)
+        if (wrapper) {
+            wrapper.style.opacity = '0';
+        }
+
+        // Pindah halaman dengan cepat setelah durasi transisi fade hitam (500ms)
+        // Musik TIDAK dimatikan di sini agar terdengar terus hingga halaman baru termuat
+        setTimeout(() => {
+            window.location.href = "3dfoto.html"; 
+        }, 500);   
+    }
+</script>
+</body>
+</html>

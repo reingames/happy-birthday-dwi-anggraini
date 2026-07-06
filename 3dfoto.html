@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>3D Interactive Gallery - Ai Edition</title>
+    
+    <!-- Link Font & Icon -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #0ea5e9;
+            --reflect: rgba(14, 165, 233, 0.3);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            /* --- PENGATURAN BACKGROUND GAMBAR --- */
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.8)), 
+                        url('https://images.unsplash.com/photo-1518837695005-2083093ee35b?q=80&w=1000&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            perspective: 1500px; 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #ffffff; 
+        }
+
+        /* --- GAYA TOMBOL MUSIK ESTETIK (GLASSMORPHISM) --- */
+        #music-container {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            height: 48px;
+            padding: 0 20px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            z-index: 10000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 15px rgba(14, 165, 233, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #music-container:active {
+            transform: scale(0.92);
+        }
+
+        #music-play-icon {
+            font-size: 0.8rem;
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        /* Struktur Gelombang Equalizer */
+        .music-wave {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            height: 14px;
+            gap: 3px;
+        }
+
+        .music-wave .stroke {
+            display: block;
+            position: relative;
+            background: rgba(255, 255, 255, 0.3);
+            height: 3px;
+            width: 3px;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        /* ANIMASI AKTIF (Saat Musik Menyala) */
+        #music-container.playing {
+            border-color: rgba(14, 165, 233, 0.4);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(14, 165, 233, 0.3);
+        }
+
+        #music-container.playing .stroke {
+            background: var(--primary);
+            animation: bounceWave 1.2s ease-in-out infinite alternate;
+        }
+
+        /* Delay & durasi acak agar gerakan gelombang tampak alami */
+        #music-container.playing .stroke:nth-child(1) { animation-delay: 0.1s; animation-duration: 0.9s; }
+        #music-container.playing .stroke:nth-child(2) { animation-delay: 0.3s; animation-duration: 1.2s; }
+        #music-container.playing .stroke:nth-child(3) { animation-delay: 0.5s; animation-duration: 0.7s; }
+        #music-container.playing .stroke:nth-child(4) { animation-delay: 0.2s; animation-duration: 1.0s; }
+
+        @keyframes bounceWave {
+            0% { height: 3px; }
+            100% { height: 14px; }
+        }
+
+        /* Tampilan diam saat musik dijeda / mati */
+        #music-container.paused .stroke {
+            height: 3px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* --- STAGE UTAMA --- */
+        #gallery-viewport {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        #drag-container, #spin-container {
+            position: relative;
+            display: flex;
+            margin: auto;
+            transform-style: preserve-3d;
+            transform: rotateX(-10deg);
+        }
+
+        #spin-container {
+            width: 130px; 
+            height: 180px;
+            transition: transform 1s;
+        }
+
+        /* --- BINGKAI FOTO --- */
+        .photo-card {
+            transform-style: preserve-3d;
+            position: absolute;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            border: 2px solid #fff;
+            box-shadow: 0 0 15px rgba(255,255,255,0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+            /* Efek Pantulan ke Bawah */
+            -webkit-box-reflect: below 15px linear-gradient(transparent, transparent, rgba(255,255,255,0.2));
+        }
+
+        .photo-card:active {
+            border-color: var(--primary);
+            box-shadow: 0 0 30px var(--primary);
+        }
+
+        .photo-card img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            pointer-events: none;
+        }
+
+        /* --- GROUND GLOW (Lantai Cahaya) --- */
+        #ground {
+            width: 1200px; height: 1200px;
+            background: radial-gradient(circle, var(--reflect) 0%, transparent 70%);
+            position: absolute;
+            top: 100%; left: 50%;
+            transform: translate(-50%, -50%) rotateX(90deg);
+            pointer-events: none;
+        }
+
+        /* --- MODAL DETAIL --- */
+        #lightbox {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: none; align-items: center; justify-content: center;
+            z-index: 99999;
+            opacity: 0; transition: 0.4s;
+        }
+        #lightbox.active { display: flex; opacity: 1; }
+        #lightbox img {
+            max-width: 90%; max-height: 80%;
+            border: 4px solid #fff; border-radius: 10px;
+            transform: scale(0.8); transition: 0.4s;
+        }
+        #lightbox.active img { transform: scale(1); }
+
+        /* --- KAPSUL PETUNJUK --- */
+        .hint {
+            position: absolute; 
+            bottom: 110px; 
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 8px 22px;
+            border-radius: 30px;
+            color: #fff;
+            opacity: 0.6; 
+            font-size: 0.7rem; 
+            letter-spacing: 2px;
+            text-align: center; 
+            pointer-events: none;
+            white-space: nowrap;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        /* --- TOMBOL LANJUTKAN --- */
+        #btn-continue {
+            position: fixed; 
+            top: 25px;
+            right: 155px; 
+            height: 48px;
+            padding: 0 25px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 30px;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            display: none; 
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            opacity: 0;
+            transform: translateY(-20px); 
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 15px rgba(14, 165, 233, 0.1);
+            z-index: 10000;
+        }
+
+        #btn-continue.show {
+            display: flex; 
+            opacity: 1;
+            transform: translateY(0);
+            border-color: rgba(14, 165, 233, 0.4);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(14, 165, 233, 0.3);
+        }
+
+        #btn-continue:active {
+            transform: scale(0.92);
+        }
+
+        /* --- SLIDE CREDIT REIN --- */
+        #s-credit {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: 0; left: 0;
+            background-color: #000;
+            z-index: 2000;
+            text-align: center;
+        }
+
+        .logo-rein { width: 95px; opacity: 0; transform: scale(0.8); transition: 2s; }
+        .logo-visible { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 10px #0ea5e9); }
+        
+        #btn-go {
+            margin-top: 30px; padding: 12px 35px; background: white; color: black; border-radius: 50px;
+            border: none; font-weight: 800; display: none; opacity: 0; transform: translateY(20px);
+            transition: 1.5s;
+            cursor: pointer;
+        }
+        .btn-visible { opacity: 1 !important; transform: translateY(0) !important; }
+
+        /* --- FLASH EFFECT --- */
+        #flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 11000; opacity: 0; pointer-events: none; }
+        .flashing { animation: flashAnim 0.8s; }
+        @keyframes flashAnim { 0% { opacity: 0.5; } 100% { opacity: 0; } }
+
+        /* --- CSS TRANSISI PELANGI --- */
+        #sweep-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 50000;
+            pointer-events: none;
+            display: none;
+        }
+
+        .sweep-layer {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+        }
+
+        .layer-1 { background: #ff4d4d; }
+        .layer-2 { background: #ffa500; }
+        .layer-3 { background: #ffdb4d; }
+        .layer-4 { background: #6BAED6; }
+
+        .sweep-active #sweep-container { display: block; }
+
+        .sweep-active .sweep-layer {
+            animation: sweepEffect 1.5s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+        }
+
+        .sweep-active .layer-2 { animation-delay: 0.1s; }
+        .sweep-active .layer-3 { animation-delay: 0.2s; }
+        .sweep-active .layer-4 { animation-delay: 0.3s; }
+
+        @keyframes sweepEffect {
+            0% { left: -100%; }
+            50% { left: 0; }
+            100% { left: 100%; }
+        }
+
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 40000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .loader-ring {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: #0ea5e9;
+            animation: spinRing 1s ease-in-out infinite;
+        }
+
+        @keyframes spinRing {
+            to { transform: rotate(360deg); }
+        }
+
+        /* --- EFEK FADE IN DARI HITAM JAMINAN AKTIF --- */
+        #fade-in-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000000; 
+            z-index: 999999;     
+            pointer-events: none; 
+            animation: fadeFromBlack 1.2s ease-out forwards;
+        }
+
+        @keyframes fadeFromBlack {
+            0% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+
+        /* ==================== CSS BARU: INTRO FULL ANIMASI (TANPA COUNTDOWN) ==================== */
+        #birthday-intro {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #FEC0CD; /* Pink khas sesuai gambar */
+            z-index: 100000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1), visibility 1.2s;
+        }
+
+        /* KUNCI KETUKAN (Saat beranimasi muncul, layar tidak bisa diklik) */
+        #birthday-intro.no-tap {
+            pointer-events: none;
+            cursor: default;
+        }
+
+        #birthday-intro.ready-to-tap {
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        .intro-animated-content {
+            text-align: center;
+            z-index: 10;
+            pointer-events: none; 
+        }
+
+        /* EFEK MUNCUL BOUNCE-IN UNTUK KADO DAN TEKS */
+        .gift-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: inline-block;
+            opacity: 0;
+            animation: entrancePop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards, 
+                      bouncePulse 2s infinite ease-in-out 0.8s;
+        }
+
+        .celebrate-text {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #212529; /* Deep Navy */
+            line-height: 1.2;
+            margin-bottom: 15px;
+            opacity: 0;
+            animation: entrancePop 1s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s forwards, 
+                      swayText 3s infinite ease-in-out alternate 1.4s;
+        }
+
+        .celebrate-text span {
+            font-size: 1.6rem;
+            font-weight: 400;
+        }
+
+        /* PETUNJUK TAP (Hanya tampil setelah seluruh teks selesai beranimasi) */
+        .tap-instruction {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 3px;
+            color: #212529;
+            margin-top: 15px;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .tap-instruction.show-inst {
+            opacity: 0.8;
+            transform: translateY(0);
+            animation: blinkText 1.5s infinite alternate ease-in-out;
+        }
+
+        /* --- ANIMASI KEYFRAMES ENTRANCE --- */
+        @keyframes entrancePop {
+            0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+            70% { transform: scale(1.1) rotate(5deg); opacity: 0.9; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        @keyframes bouncePulse {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-15px) scale(1.1); }
+        }
+
+        @keyframes swayText {
+            0% { transform: rotate(-3deg); }
+            100% { transform: rotate(3deg); }
+        }
+
+        @keyframes blinkText {
+            0% { opacity: 0.3; }
+            100% { opacity: 0.9; }
+        }
+
+        /* Hati Melayang secara Vertikal */
+        .floating-heart {
+            position: absolute;
+            bottom: -50px;
+            color: #E24C68;
+            user-select: none;
+            pointer-events: none;
+            animation: riseUp linear infinite;
+        }
+
+        @keyframes riseUp {
+            0% {
+                transform: translateY(0) rotate(0deg) scale(0.5);
+                opacity: 0;
+            }
+            15% {
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateY(-110vh) rotate(360deg) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        /* Konfeti Otomatis */
+        .intro-conf {
+            position: absolute;
+            width: 8px;
+            height: 12px;
+            opacity: 0.7;
+            pointer-events: none;
+            animation: introFall 4s linear infinite;
+        }
+
+        @keyframes introFall {
+            0% { transform: translateY(-20px) rotate(0deg); }
+            100% { transform: translateY(110vh) rotate(360deg); }
+        }
+
+        /* Awan Gerak Halus */
+        .intro-clouds {
+            position: absolute;
+            bottom: -50px;
+            left: 0;
+            width: 100%;
+            height: 250px;
+            pointer-events: none;
+        }
+        .icloud {
+            position: absolute;
+            background: #FFFFFF;
+            border-radius: 50%;
+            animation: driftCloud 4s infinite alternate ease-in-out;
+        }
+        .ic1 { width: 300px; height: 300px; bottom: -120px; left: -50px; opacity: 0.95; }
+        .ic2 { width: 400px; height: 400px; bottom: -180px; left: 50%; transform: translateX(-50%); opacity: 0.98; animation-delay: 1s; }
+        .ic3 { width: 320px; height: 320px; bottom: -130px; right: -70px; opacity: 0.95; animation-delay: 2s; }
+
+        @keyframes driftCloud {
+            0% { transform: translateY(0) translateX(0); }
+            100% { transform: translateY(-5px) translateX(8px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="fade-in-overlay"></div>
+
+    <!-- ==================== HTML INTRO FULL ANIMASI (TANPA COUNTDOWN) ==================== -->
+    <div id="birthday-intro" class="no-tap" onclick="triggerGalleryTransition()">
+        <!-- Wadah untuk animasi hati melayang secara dinamis -->
+        <div id="dynamic-hearts-container"></div>
+        
+        <!-- Wadah untuk animasi konfeti otomatis di latar belakang -->
+        <div id="intro-confetti-container"></div>
+
+        <div class="intro-animated-content">
+            <div class="gift-icon">🎁</div>
+            <h1 class="celebrate-text">Happy Birthday<br><span>DWI ANGGRAINI</span></h1>
+            <p class="tap-instruction">KETUK LAYAR UNTUK LANJUT</p>
+        </div>
+
+        <!-- Tumpukan Awan Estetik di Bagian Bawah -->
+        <div class="intro-clouds">
+            <div class="icloud ic1"></div>
+            <div class="icloud ic2"></div>
+            <div class="icloud ic3"></div>
+        </div>
+    </div>
+    <!-- =================================================================================== -->
+
+    <!-- TOMBOL MUSIK ESTETIK (WAVE EQUALIZER) -->
+    <div id="music-container" class="paused" onclick="toggleMusic()">
+        <div class="music-wave">
+            <span class="stroke"></span>
+            <span class="stroke"></span>
+            <span class="stroke"></span>
+            <span class="stroke"></span>
+        </div>
+        <i class="fa-solid fa-play" id="music-play-icon"></i>
+    </div>
+
+    <!-- LAYAR LOADING -->
+    <div id="loading-screen">
+        <div class="loader-ring"></div>
+        <p style="margin-top:20px; letter-spacing:3px; font-size:0.8rem; opacity:0.8;">LOADING WEBSITE</p>
+    </div>
+
+    <!-- TRANSISI PELANGI -->
+    <div id="sweep-container">
+        <div class="sweep-layer layer-1"></div>
+        <div class="sweep-layer layer-2"></div>
+        <div class="sweep-layer layer-3"></div>
+        <div class="sweep-layer layer-4"></div>
+    </div>
+
+    <div id="flash"></div>
+
+    <audio id="slideshowMusic" loop>
+        <source src="https://files.catbox.moe/39ex4l.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- AREA UTAMA GALERI 3D -->
+    <div id="gallery-viewport">
+        <div id="drag-container">
+            <div id="spin-container">
+                <!-- 10 SLOT FOTO -->
+                <div class="photo-card" onclick="openFull(this)"><img src="https://i.postimg.cc/8C209skb/foto1.jpg"></div>
+                <div class="photo-card" onclick="openFull(this)"><img src="https://i.postimg.cc/DzJNx1hV/foto10.jpg"></div>
+                <div class="photo-card" onclick="openFull(this)"><img src="https://i.postimg.cc/xdJZ6LQH/foto2.jpg"></div>
+                <div class="photo-card" onclick="openFull(this)"><img src="https://i.postimg.cc/pdhSsKvn/foto3.jpg"></div>
+                <div class="photo-card" onclick="openFull(this)"><img src="https://i.postimg.cc/jjpFmCqm/foto4.jpg"></div>
+                <div class="photo-card" onclick="openFull(this)"><img src="https://i.postimg.cc/5tYrs8Vh/foto5.jpg"></div>
+                <div class="photo-card" onclick="openFull(this)"><img src="https://i.postimg.cc/9f6nKzXD/foto6.jpg"></div>
+                <div class="photo-card" onclick="openFull(this)"><img src="https://i.postimg.cc/63CmXwy5/foto7.avif"></div>
+                <div class="photo-card" onclick="openFull(this)"><img src="https://i.postimg.cc/fLYrNZJJ/foto8.avif"></div>
+                <div class="photo-card" onclick="openFull(this)"><img src="https://i.postimg.cc/R0kDyqCP/foto9.jpg"></div>
+            </div>
+            <div id="ground"></div>
+        </div>
+        
+        <div class="hint">SWIPE UNTUK MEMUTAR • TAP FOTO UNTUK ZOOM</div>
+        <button id="btn-continue" onclick="showCredit()">LANJUTKAN <i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+
+    <!-- AREA CREDIT SCENE -->
+    <div id="s-credit">
+        <p id="text-prod" style="opacity: 0; transition: opacity 2s; margin-bottom: 20px; font-size: 0.6rem; letter-spacing: 4px; text-transform: uppercase; color: #ffffff;">Produced by</p>
+        <img src="https://i.postimg.cc/W4vcpKpZ/logorein.png" class="logo-rein" id="rein-logo">
+        <button id="btn-go" onclick="enterSite()">BUKA WEBSITE</button>
+    </div>
+
+    <!-- DETAIL ZOOM LIGHTBOX -->
+    <div id="lightbox" onclick="closeLightbox()">
+        <img id="fullImg" src="">
+    </div>
+
+    <script>
+        // ==================== JAVASCRIPT: LOGIKA INTRO ANIMASI & PENUNDAAN GALERI ====================
+
+        // Generate animasi melayang saat halaman dimuat
+        document.addEventListener("DOMContentLoaded", () => {
+            generateFloatingHearts();
+            generateIntroConfetti();
+            enableIntroTapAfterAnimation();
+        });
+
+        // Menghasilkan efek hati melayang secara acak
+        function generateFloatingHearts() {
+            const container = document.getElementById("dynamic-hearts-container");
+            if (!container) return;
+            const heartSymbols = ["♥", "💖", "💕", "❤️"];
+            
+            setInterval(() => {
+                const heart = document.createElement("div");
+                heart.classList.add("floating-heart");
+                heart.innerText = heartSymbols[Math.floor(Math.random() * heartSymbols.length)];
+                
+                heart.style.left = Math.random() * 100 + "vw";
+                const duration = Math.random() * 3 + 4; // Durasi 4 - 7 detik
+                heart.style.animationDuration = duration + "s";
+                heart.style.fontSize = Math.random() * 1.5 + 1 + "rem"; 
+                
+                container.appendChild(heart);
+                
+                setTimeout(() => heart.remove(), duration * 1000);
+            }, 400); 
+        }
+
+        // Menghasilkan efek konfeti di latar belakang intro
+        function generateIntroConfetti() {
+            const container = document.getElementById("intro-confetti-container");
+            if (!container) return;
+            const colors = ["#ff4d4d", "#ffa500", "#ffdb4d", "#6BAED6", "#A52EC1", "#FFFFFF"];
+            
+            for (let i = 0; i < 40; i++) {
+                const conf = document.createElement("div");
+                conf.classList.add("intro-conf");
+                conf.style.left = Math.random() * 100 + "vw";
+                conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                conf.style.animationDelay = Math.random() * 4 + "s";
+                conf.style.animationDuration = (Math.random() * 2 + 3) + "s";
+                container.appendChild(conf);
+            }
+        }
+
+        // Membuka kunci ketukan setelah seluruh teks utama selesai beranimasi muncul
+        function enableIntroTapAfterAnimation() {
+            setTimeout(() => {
+                const intro = document.getElementById("birthday-intro");
+                const instruction = document.querySelector(".tap-instruction");
+                
+                if (intro) {
+                    intro.classList.remove("no-tap");
+                    intro.classList.add("ready-to-tap");
+                }
+                if (instruction) {
+                    instruction.classList.add("show-inst");
+                }
+            }, 2200); // Durasi 2.2 detik (menyesuaikan kemunculan kado + teks ulang tahun)
+        }
+
+        // Fungsi pemicu transisi ketukan layar
+        function triggerGalleryTransition() {
+            const intro = document.getElementById("birthday-intro");
+            
+            // Verifikasi ganda: hanya eksekusi jika kunci ketuk (.no-tap) sudah dilepas
+            if (!intro || intro.classList.contains("no-tap") || intro.style.opacity === "0") return;
+
+            intro.style.opacity = "0";
+            intro.style.pointerEvents = "none";
+            
+            // MEMUTAR AUDIO SECARA OTOMATIS (Bebas blokir iOS karena berdasar interaksi klik asli)
+            const music = document.getElementById("slideshowMusic");
+            if (music && music.paused) {
+                music.currentTime = 8; 
+                music.play().then(() => {
+                    const musicBtn = document.getElementById("music-container");
+                    const musicIcon = document.getElementById("music-play-icon");
+                    if (musicBtn && musicIcon) {
+                        musicBtn.classList.remove("paused");
+                        musicBtn.classList.add("playing");
+                        musicIcon.className = "fa-solid fa-pause";
+                    }
+                }).catch(e => console.log("Gagal memutar audio:", e));
+            }
+
+            // INISIALISASI DAN PUTARAN FOTO 3D (Hanya dipanggil setelah layar diketuk)
+            setTimeout(() => {
+                intro.style.display = "none";
+                
+                // Mulai penyusunan posisi kartu foto 3D
+                init(); 
+                
+                // Mulai jalankan animasi rotasi melingkar
+                if (autoRotate && ospin) {
+                    ospin.style.animation = `spin ${Math.abs(rotateSpeed)}s infinite linear`;
+                }
+
+                // Mulai hitung mundur 10 detik untuk memunculkan tombol 'LANJUTKAN'
+                startContinueButtonTimer();
+            }, 1200); 
+        }
+
+        // Fungsi pewaktu tombol lanjutkan agar berjalan setelah masuk galeri
+        function startContinueButtonTimer() {
+            setTimeout(() => {
+                const btnContinue = document.getElementById('btn-continue');
+                if (btnContinue) {
+                    btnContinue.style.display = 'flex';
+                    void btnContinue.offsetWidth; 
+                    btnContinue.classList.add('show');
+                }
+            }, 10000); // Muncul 10 detik setelah galeri dimulai
+        }
+        // ==================================================================================================
+
+
+        // A. Fungsi klik manual untuk Play / Pause musik
+        function toggleMusic() {
+            const container = document.getElementById("music-container");
+            const icon = document.getElementById("music-play-icon");
+            
+            setTimeout(() => {
+                const overlay = document.getElementById('fade-in-overlay');
+                if (overlay) {
+                    overlay.style.display = 'none';
+                }
+            }, 1200);
+            
+            if (music.paused) {
+                if (music.currentTime === 0 || music.currentTime < 1) {
+                    music.currentTime = 20;
+                }
+                music.play().then(() => {
+                    container.classList.remove("paused");
+                    container.classList.add("playing");
+                    icon.className = "fa-solid fa-pause";
+                }).catch(err => {
+                    console.log("Pemutaran otomatis diblokir sistem browser: ", err);
+                });
+            } else {
+                music.pause();
+                container.classList.remove("playing");
+                container.classList.add("paused");
+                icon.className = "fa-solid fa-play";
+            }
+        }
+
+        var radius = 380; 
+        var autoRotate = true;
+        var rotateSpeed = -80; 
+
+        var odrag = document.getElementById('drag-container');
+        var ospin = document.getElementById('spin-container');
+        var aDiv = ospin.getElementsByTagName('div');
+        const music = document.getElementById("slideshowMusic");
+
+        var style = document.createElement('style');
+        style.type = 'text/css';
+        var keyFrames = `
+            @keyframes spin { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
+            @keyframes spinRevert { from { transform: rotateY(360deg); } to { transform: rotateY(0deg); } }
+        `;
+        style.innerHTML = keyFrames;
+        document.getElementsByTagName('head')[0].appendChild(style);
+
+        function init(delayTime) {
+            for (var i = 0; i < aDiv.length; i++) {
+                aDiv[i].style.transform = "rotateY(" + (i * (360 / aDiv.length)) + "deg) translateZ(" + radius + "px)";
+                aDiv[i].style.transition = "transform 1s";
+                aDiv[i].style.transitionDelay = delayTime || (aDiv.length - i) / 4 + "s";
+            }
+        }
+
+        // CATATAN: setTimeout(init, 500) bawaan dan inisialisasi putaran global di bawah ini telah dihapus 
+        // agar tidak memuat galeri sebelum layar intro diketuk.
+
+        function showCredit() {
+            const flash = document.getElementById('flash');
+            const gallery = document.getElementById('gallery-viewport');
+            const credit = document.getElementById('s-credit');
+
+            if (flash) {
+                flash.classList.add('flashing');
+                setTimeout(() => flash.classList.remove('flashing'), 800);
+            }
+
+            if (gallery) gallery.style.display = 'none';
+            if (credit) {
+                credit.style.display = 'flex';
+                setTimeout(() => {
+                    const textProd = document.getElementById('text-prod');
+                    if(textProd) textProd.style.opacity = '0.7';
+                }, 500);
+                setTimeout(() => {
+                    const logo = document.getElementById('rein-logo');
+                    if(logo) logo.classList.add('logo-visible');
+                }, 1500);
+                setTimeout(() => {
+                    const btn = document.getElementById('btn-go');
+                    if (btn) {
+                        btn.style.display = 'block';
+                        setTimeout(() => btn.classList.add('btn-visible'), 100);
+                    }
+                }, 3200);
+            }
+        }
+
+        var sX, sY, nX, nY, desX = 0, desY = 0, tX = 0, tY = 10;
+        var touchMoveHandler = null;
+        var touchEndHandler = null;
+
+        function pauseRotate(status) {
+            ospin.style.animationPlayState = status ? 'paused' : 'running';
+        }
+
+        document.addEventListener('touchstart', function (e) {
+            if (e.target.closest('#btn-continue') || e.target.closest('#music-container') || e.target.closest('#lightbox') || e.target.closest('#birthday-intro')) return;
+
+            pauseRotate(true);
+            clearInterval(odrag.timer);
+            
+            var touch = e.touches[0];
+            sX = touch.clientX;
+            sY = touch.clientY;
+
+            if (touchMoveHandler) document.removeEventListener('touchmove', touchMoveHandler);
+            if (touchEndHandler) document.removeEventListener('touchend', touchEndHandler);
+
+            touchMoveHandler = function (e) {
+                var touch = e.touches[0];
+                nX = touch.clientX;
+                nY = touch.clientY;
+                desX = nX - sX;
+                desY = nY - sY;
+                tX += desX * 0.1;
+                tY += desY * 0.1;
+                applyTransform(odrag);
+                sX = nX;
+                sY = nY;
+            };
+
+            touchEndHandler = function (e) {
+                odrag.timer = setInterval(function () {
+                    desX *= 0.95;
+                    desY *= 0.95;
+                    tX += desX * 0.1;
+                    tY += desY * 0.1;
+                    applyTransform(odrag);
+                    if (Math.abs(desX) < 0.5 && Math.abs(desY) < 0.5) {
+                        clearInterval(odrag.timer);
+                        pauseRotate(false);
+                    }
+                }, 17);
+                document.removeEventListener('touchmove', touchMoveHandler);
+                document.removeEventListener('touchend', touchEndHandler);
+            };
+
+            document.addEventListener('touchmove', touchMoveHandler, { passive: true });
+            document.addEventListener('touchend', touchEndHandler, { passive: true });
+        }, { passive: true });
+
+        function applyTransform(obj) {
+            if (tY > 180) tY = 180;
+            if (tY < 0) tY = 0;
+            obj.style.transform = "rotateX(" + (-tY) + "deg) rotateY(" + (tX) + "deg)";
+        }
+
+        function openFull(el) {
+            const imgSrc = el.querySelector('img').src;
+            const lightbox = document.getElementById('lightbox');
+            const fullImg = document.getElementById('fullImg');
+            fullImg.src = imgSrc;
+            lightbox.style.display = 'flex';
+            void lightbox.offsetWidth;
+            lightbox.classList.add('active');
+        }
+
+        function closeLightbox() {
+            var lightbox = document.getElementById('lightbox');
+            if (lightbox) {
+                lightbox.classList.remove('active');
+                setTimeout(() => {
+                    lightbox.style.display = 'none';
+                }, 400); 
+            }
+        }
+
+        function enterSite() {
+            const musicObj = document.getElementById("slideshowMusic");
+            const loader = document.getElementById('loading-screen');
+            const sweep = document.getElementById('sweep-container');
+
+            if(musicObj) musicObj.pause();
+
+            document.body.classList.add('sweep-active');
+
+            setTimeout(() => {
+                if(loader) loader.style.display = 'flex'; 
+            }, 700); 
+
+            setTimeout(() => {
+                window.location.href = "home.html"; 
+            }, 2000);   
+        }
+    </script>
+</body>
+</html>

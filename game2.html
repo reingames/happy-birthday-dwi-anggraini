@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ai Brain Match</title>
+    
+    <!-- Google Fonts & FontAwesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #4BB8FA;
+            --primary-dark: #0284c7;
+            --bg: #f8fafc;
+            --white: #ffffff;
+            --text: #1e293b;
+        }
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            /* Latar belakang aurora bergerak yang menarik */
+            background: radial-gradient(circle at 20% 30%, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- DESAIN BACKGROUND MENARIK (AURORA GLOW) --- */
+        .aurora-glow-1 {
+            position: fixed;
+            top: -10%; left: -10%;
+            width: 320px; height: 320px;
+            background: rgba(14, 165, 233, 0.35);
+            filter: blur(80px);
+            border-radius: 50%;
+            animation: floatGlow1 12s infinite alternate ease-in-out;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .aurora-glow-2 {
+            position: fixed;
+            bottom: -15%; right: -10%;
+            width: 380px; height: 380px;
+            background: rgba(56, 189, 248, 0.3);
+            filter: blur(90px);
+            border-radius: 50%;
+            animation: floatGlow2 15s infinite alternate-reverse ease-in-out;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        @keyframes floatGlow1 {
+            0% { transform: scale(1) translate(0, 0); }
+            100% { transform: scale(1.2) translate(40px, 30px); }
+        }
+
+        @keyframes floatGlow2 {
+            0% { transform: scale(1) translate(0, 0); }
+            100% { transform: scale(1.15) translate(-30px, -40px); }
+        }
+
+        /* --- KARTU UTAMA GAME --- */
+        .game-card-container {
+            width: 100%;
+            max-width: 360px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 28px;
+            padding: 24px;
+            box-shadow: 0 15px 35px rgba(2, 132, 199, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            text-align: center;
+            z-index: 10;
+        }
+
+        .game-title {
+            margin-bottom: 15px;
+        }
+
+        .game-title h2 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -0.5px;
+            text-transform: uppercase;
+        }
+
+        .game-title p {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        /* --- INDIKATOR NYAWA (LIVES) --- */
+        .lives-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            background: rgba(15, 23, 42, 0.05);
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+
+        .lives-label {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stars-wrapper {
+            display: flex;
+            gap: 4px;
+        }
+
+        .star-icon {
+            font-size: 1rem;
+            color: #fbbf24; /* Warna kuning emas */
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .star-icon.lost {
+            color: #cbd5e1; /* Warna abu-abu saat nyawa hilang */
+            transform: scale(0.8);
+        }
+
+        /* --- GRID BOARD KARTU (4x4) --- */
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto 20px;
+            perspective: 1000px;
+        }
+
+        .card {
+            width: 100%;
+            aspect-ratio: 1; /* Membuat kartu kotak sempurna */
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        /* DIPERBESAR: Gaya isi teks dan tanda tanya di permukaan kartu */
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-size: 2.2rem; /* Diperbesar dari 1.6rem agar presisi & sangat jelas */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        /* Sisi Belakang Kartu (Tertutup) */
+        .card-back {
+            background-color: var(--secondary);
+            border: 2px solid var(--primary);
+            color: var(--primary-dark);
+        }
+
+        /* Sisi Depan Kartu (Terbuka/Isi) */
+        .card-front {
+            background-color: var(--white);
+            border: 2px solid var(--primary-dark);
+            transform: rotateY(180deg);
+        }
+
+        /* Cocok / Sukses Match */
+        .card.matched .card-front {
+            border-color: #10b981;
+            background-color: #ecfdf5;
+            color: #10b981;
+        }
+
+        /* --- TOMBOL KENDALI --- */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 14px;
+            border: none;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-restart {
+            background-color: var(--primary-dark);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+        }
+
+        .btn-exit {
+            background-color: rgba(15, 23, 42, 0.05);
+            color: #475569;
+            border: 1px solid rgba(15, 23, 42, 0.05);
+        }
+
+        /* --- POP UP OVERLAY (MENANG & GAME OVER) --- */
+        .overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .dialog-box {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 30px;
+            text-align: center;
+            max-width: 320px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .dialog-box h3 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 10px;
+        }
+
+        .dialog-box p {
+            font-size: 0.85rem;
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ornamen Aurora Latar Belakang -->
+    <div class="aurora-glow-1"></div>
+    <div class="aurora-glow-2"></div>
+
+    <!-- KARTU UTAMA GAME -->
+    <div class="game-card-container">
+        <div class="game-title">
+            <h2>Ai Brain Match</h2>
+            <p>Temukan 8 pasang ikon pengetahuan umum</p>
+        </div>
+
+        <!-- Indikator Sisa Nyawa (Menggunakan 6 Perisai Geometris) -->
+        <div class="lives-container">
+            <span class="lives-label">Nyawa:</span>
+            <div class="stars-wrapper" id="stars-container">
+                <i class="fa-solid fa-shield star-icon" id="star-0"></i>
+                <i class="fa-solid fa-shield star-icon" id="star-1"></i>
+                <i class="fa-solid fa-shield star-icon" id="star-2"></i>
+                <i class="fa-solid fa-shield star-icon" id="star-3"></i>
+                <i class="fa-solid fa-shield star-icon" id="star-4"></i>
+                <i class="fa-solid fa-shield star-icon" id="star-5"></i>
+            </div>
+        </div>
+
+        <!-- Papan Grid Kartu -->
+        <div id="game-board"></div>
+
+        <!-- Tombol Kontrol Bawah -->
+        <div class="btn-group">
+            <button class="btn btn-restart" onclick="restartGame()"><i class="fa-solid fa-rotate-right"></i> Acak Ulang</button>
+            <button class="btn btn-exit" onclick="confirmExit()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Keluar</button>
+        </div>
+    </div>
+
+    <!-- 1. Pop Up Kemenangan -->
+    <div id="win-overlay" class="overlay">
+        <div class="dialog-box">
+            <i class="fa-solid fa-star" style="font-size: 3rem; color: #fbbf24; margin-bottom: 15px;"></i>
+            <h3>Hebat,Congrats! 🎉</h3>
+            <p>Kamu berhasil memecahkan seluruh pencocokan ilmu pengetahuan dengan ingatan yang cemerlang!</p>
+            <button class="btn btn-restart" onclick="closeOverlay('win-overlay')" style="width: 100%;">Main Lagi</button>
+        </div>
+    </div>
+
+    <!-- 2. Pop Up Game Over -->
+    <div id="gameover-overlay" class="overlay">
+        <div class="dialog-box">
+            <i class="fa-solid fa-circle-xmark" style="font-size: 3rem; color: #ef4444; margin-bottom: 15px;"></i>
+            <h3>Game Over! 🥺</h3>
+            <p>Sayang sekali nyawamu telah habis. Jangan menyerah, coba asah ingatanmu kembali!</p>
+            <button class="btn btn-restart" onclick="closeOverlay('gameover-overlay')" style="width: 100%; background-color: var(--primary-dark); color: white;">Coba Lagi</button>
+        </div>
+    </div>
+
+    <script>
+        // 8 Ikon Pengetahuan Umum (🚀 Teknologi, 🗼 Geografi, 🔬 Sains, 🎨 Seni, ⚽ Olahraga, 📚 Sastra, 📐 Matematika, 🌎 Astronomi)
+        const cardIcons = ["🚀", "🗼", "🔬", "🎨", "⚽", "📚", "📐", "🌎"];
+        let cards = [...cardIcons, ...cardIcons];
+        
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let lockBoard = false;
+        let lives = 6; // Mengubah nyawa awal menjadi 6 [1]
+
+        const boardElement = document.getElementById("game-board");
+
+        // Membuat Struktur Kartu di Board
+        function createBoard() {
+            boardElement.innerHTML = "";
+            shuffle(cards);
+
+            cards.forEach((icon, index) => {
+                const card = document.createElement("div");
+                card.classList.add("card");
+                card.dataset.icon = icon;
+                card.dataset.index = index;
+
+                // Sisi Belakang (Tertutup - Tanda Tanya Netral)
+                const cardBack = document.createElement("div");
+                cardBack.classList.add("card-face", "card-back");
+                cardBack.innerHTML = `<i class="fa-solid fa-question"></i>`;
+
+                // Sisi Depan (Terbuka - Ikon Ilmu Pengetahuan)
+                const cardFront = document.createElement("div");
+                cardFront.classList.add("card-face", "card-front");
+                cardFront.innerText = icon;
+
+                card.appendChild(cardBack);
+                card.appendChild(cardFront);
+
+                card.addEventListener("click", flipCard);
+                boardElement.appendChild(card);
+            });
+
+            updateLivesUI();
+        }
+
+        // Fungsi Mengocok Array secara Acak
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Aksi Membalik Kartu
+        function flipCard() {
+            if (lockBoard) return;
+            if (lives <= 0) return; // Mencegah klik saat game over
+            if (this === flippedCards[0]) return; // Cegah klik kartu yang sama dua kali
+
+            this.classList.add("flipped");
+            flippedCards.push(this);
+
+            if (flippedCards.length === 2) {
+                checkMatch();
+            }
+        }
+
+        // Cek Kesamaan Pasangan Kartu
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+            const isMatch = card1.dataset.icon === card2.dataset.icon;
+
+            if (isMatch) {
+                disableCards();
+            } else {
+                unflipCards();
+            }
+        }
+
+        // Jika Kartu Cocok (+2 Nyawa) [1]
+        function disableCards() {
+            flippedCards[0].classList.add("matched");
+            flippedCards[1].classList.add("matched");
+
+            // Menambah nyawa +2 saat tebakan benar (maksimal 6) [1]
+            lives = Math.min(6, lives + 2); 
+            updateLivesUI();
+
+            resetRound();
+            matchedPairs++;
+
+            if (matchedPairs === cardIcons.length) {
+                showOverlay("win-overlay");
+            }
+        }
+
+        // Jika Kartu Tidak Cocok (Tutup Kembali & Kurangi Nyawa 1) [1]
+        function unflipCards() {
+            lockBoard = true;
+            lives--; // Pengurangan nyawa [1]
+            updateLivesUI();
+
+            setTimeout(() => {
+                flippedCards[0].classList.remove("flipped");
+                flippedCards[1].classList.remove("flipped");
+                resetRound();
+
+                // Periksa apakah nyawa habis [1]
+                if (lives <= 0) {
+                    showOverlay("gameover-overlay");
+                }
+            }, 1000);
+        }
+
+        // Sinkronisasi Indikator Sisa Nyawa secara Visual [1]
+        function updateLivesUI() {
+            for (let i = 0; i < 6; i++) {
+                const star = document.getElementById(`star-${i}`);
+                if (star) {
+                    if (i < lives) {
+                        star.classList.remove("lost");
+                    } else {
+                        star.classList.add("lost"); // Ubah warna jadi abu-abu jika hilang [1]
+                    }
+                }
+            }
+        }
+
+        function resetRound() {
+            flippedCards = [];
+            lockBoard = false;
+        }
+
+        function showOverlay(overlayId) {
+            setTimeout(() => {
+                const overlay = document.getElementById(overlayId);
+                overlay.style.display = "flex";
+                void overlay.offsetWidth;
+                overlay.style.opacity = "1";
+            }, 500);
+        }
+
+        function closeOverlay(overlayId) {
+            const overlay = document.getElementById(overlayId);
+            overlay.style.opacity = "0";
+            setTimeout(() => {
+                overlay.style.display = "none";
+                restartGame();
+            }, 400);
+        }
+
+        function restartGame() {
+            matchedPairs = 0;
+            lives = 6; // Reset nyawa ke semula [1]
+            resetRound();
+            createBoard();
+        }
+
+        // Fungsi Keluar Game dengan konfirmasi [2.1]
+        function confirmExit() {
+            const isConfirmed = confirm("Apakah anda yakin ingin keluar dari game?");
+            if (isConfirmed) {
+                window.location.href = "home.html"; // Kembali ke file utama [2.1]
+            }
+        }
+
+        // Jalankan game pertama kali saat dimuat
+        createBoard();
+    </script>
+</body>
+</html>

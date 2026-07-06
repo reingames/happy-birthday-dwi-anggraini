@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ai Slide Puzzle</title>
+    
+    <!-- Google Fonts & FontAwesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #4BB8FA;
+            --primary-dark: #0284c7;
+            --bg: #f8fafc;
+            --white: #ffffff;
+            --text: #1e293b;
+        }
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            /* Latar belakang cerah bermotif aurora bergerak agar menarik */
+            background: radial-gradient(circle at 20% 30%, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- DESAIN BACKGROUND MENARIK (AURORA GLOW) --- */
+        .aurora-glow-1 {
+            position: fixed;
+            top: -10%; left: -10%;
+            width: 320px; height: 320px;
+            background: rgba(14, 165, 233, 0.35);
+            filter: blur(80px);
+            border-radius: 50%;
+            animation: floatGlow1 12s infinite alternate ease-in-out;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .aurora-glow-2 {
+            position: fixed;
+            bottom: -15%; right: -10%;
+            width: 380px; height: 380px;
+            background: rgba(56, 189, 248, 0.3);
+            filter: blur(90px);
+            border-radius: 50%;
+            animation: floatGlow2 15s infinite alternate-reverse ease-in-out;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        @keyframes floatGlow1 {
+            0% { transform: scale(1) translate(0, 0); }
+            100% { transform: scale(1.2) translate(40px, 30px); }
+        }
+
+        @keyframes floatGlow2 {
+            0% { transform: scale(1) translate(0, 0); }
+            100% { transform: scale(1.15) translate(-30px, -40px); }
+        }
+
+        /* --- KARTU UTAMA GAME (GLASSMORPHISM STYLE) --- */
+        .game-card-container {
+            width: 100%;
+            max-width: 350px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 28px;
+            padding: 24px;
+            box-shadow: 0 15px 35px rgba(2, 132, 199, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            text-align: center;
+            z-index: 10;
+        }
+
+        .game-title {
+            margin-bottom: 18px;
+        }
+
+        .game-title h2 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -0.5px;
+            text-transform: uppercase;
+        }
+
+        .game-title p {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        /* --- PAPAN BOARD PUZZLE (RASIO 9:16) --- */
+        #puzzle-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3px;
+            width: 270px;  /* Lebar total */
+            height: 480px; /* Tinggi total (Rasio 9:16) */
+            margin: 0 auto 15px;
+            border: 3.5px solid var(--primary-dark);
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: #cbd5e1;
+            box-shadow: 0 8px 24px rgba(2, 132, 199, 0.18);
+            user-select: none;
+        }
+
+        .tile {
+            width: 90px;
+            height: 160px;
+            background-image: url('https://files.catbox.moe/47nsty.jpg');
+            background-size: 270px 480px; /* Jaminan skala gambar pas dengan ukuran board [2.1] */
+            cursor: pointer;
+            transition: background-position 0.1s ease;
+        }
+
+        /* Ubin Kosong */
+        .tile-empty {
+            background-image: none !important;
+            background-color: rgba(15, 23, 42, 0.12);
+            cursor: default;
+        }
+
+        /* --- TOMBOL KENDALI --- */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 14px;
+            border: none;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-restart {
+            background-color: var(--primary-dark);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+        }
+
+        .btn-exit {
+            background-color: rgba(15, 23, 42, 0.05);
+            color: #475569;
+            border: 1px solid rgba(15, 23, 42, 0.05);
+        }
+
+        /* --- HINT AREA --- */
+        .hint-container {
+            margin: 10px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hint-toggle-text {
+            font-size: 0.75rem;
+            color: var(--primary-dark);
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        #hint-image {
+            width: 56px;   /* Lebar proporsional 9:16 */
+            height: 100px; /* Tinggi proporsional */
+            border-radius: 6px;
+            border: 1.5px solid #cbd5e1;
+            display: none;
+            object-fit: cover;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* --- POP UP KEMENANGAN --- */
+        #win-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .win-box {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 30px;
+            text-align: center;
+            max-width: 320px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .win-box h3 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 10px;
+        }
+
+        .win-box p {
+            font-size: 0.85rem;
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ornamen Aurora Latar Belakang -->
+    <div class="aurora-glow-1"></div>
+    <div class="aurora-glow-2"></div>
+
+    <!-- KARTU UTAMA GAME -->
+    <div class="game-card-container">
+        <!-- Judul Atas -->
+        <div class="game-title">
+            <h2>Ai Slide Puzzle</h2>
+            <p>Ketuk atau geser kotak gambar ke ubin kosong</p>
+        </div>
+
+        <!-- Papan Board Puzzle -->
+        <div id="puzzle-board"></div>
+
+        <!-- Bantuan Gambar Asli (Hint) -->
+        <div class="hint-container">
+            <span class="hint-toggle-text" onclick="toggleHint()"><i class="fa-solid fa-eye"></i> Tampilkan Contekan Foto</span>
+            <img id="hint-image" src="https://files.catbox.moe/47nsty.jpg" alt="Hint">
+        </div>
+
+        <!-- Tombol Kontrol Bawah -->
+        <div class="btn-group">
+            <button class="btn btn-restart" onclick="restartGame()"><i class="fa-solid fa-rotate-right"></i> Acak</button>
+            <button class="btn btn-exit" onclick="confirmExit()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Keluar</button>
+        </div>
+    </div>
+
+    <!-- Pop Up Kemenangan -->
+    <div id="win-overlay">
+        <div class="win-box">
+            <i class="fa-solid fa-trophy" style="font-size: 3rem; color: #fbbf24; margin-bottom: 15px;"></i>
+            <h3>Selamat 🎉</h3>
+            <p>Kamu berhasil merapikan dan memecahkan puzzle foto ini dengan sangat luar biasa!</p>
+            <button class="btn btn-restart" onclick="closeWinOverlay()" style="width: 100%;">Main Lagi</button>
+        </div>
+    </div>
+
+    <script>
+        const boardSize = 3;
+        let board = [0, 1, 2, 3, 4, 5, 6, 7, 8]; 
+        const emptyTileValue = 8;
+
+        // Koordinat grid ubin asli [baris, kolom]
+        const tileCoordinates = [
+            { r: 0, c: 0 }, { r: 0, c: 1 }, { r: 0, c: 2 },
+            { r: 1, c: 0 }, { r: 1, c: 1 }, { r: 1, c: 2 },
+            { r: 2, c: 0 }, { r: 2, c: 1 }, { r: 2, c: 2 }
+        ];
+
+        const boardElement = document.getElementById("puzzle-board");
+
+        // Koordinat gerakan geser (Swipe)
+        let dragStartX = 0;
+        let dragStartY = 0;
+
+        // Menggambar Papan Puzzle
+        function renderBoard() {
+            boardElement.innerHTML = "";
+            board.forEach((tileValue, currentIndex) => {
+                const tile = document.createElement("div");
+                tile.classList.add("tile");
+                
+                if (tileValue === emptyTileValue) {
+                    tile.classList.add("tile-empty");
+                } else {
+                    const originCoords = tileCoordinates[tileValue];
+                    // Lebar ubin = 90px (270/3), tinggi ubin = 160px (480/3) [2.1]
+                    const posX = (originCoords.c * 90) + "px";
+                    const posY = (originCoords.r * 160) + "px";
+                    tile.style.backgroundPosition = `-${posX} -${posY}`;
+                }
+
+                // 1. DUKUNGAN RESPONSif KETUKAN / CLIK
+                tile.addEventListener("click", () => handleTileClick(currentIndex));
+
+                // 2. SENSOR GESER (SWIPE GESTURE) SENTUHAN JARI & DRAG MOUSE
+                tile.addEventListener("touchstart", (e) => {
+                    dragStartX = e.touches[0].clientX;
+                    dragStartY = e.touches[0].clientY;
+                }, { passive: true });
+
+                tile.addEventListener("touchend", (e) => {
+                    const dragEndX = e.changedTouches[0].clientX;
+                    const dragEndY = e.changedTouches[0].clientY;
+                    detectSwipe(currentIndex, dragStartX, dragStartY, dragEndX, dragEndY);
+                });
+
+                tile.addEventListener("mousedown", (e) => {
+                    dragStartX = e.clientX;
+                    dragStartY = e.clientY;
+                });
+
+                tile.addEventListener("mouseup", (e) => {
+                    const dragEndX = e.clientX;
+                    const dragEndY = e.clientY;
+                    detectSwipe(currentIndex, dragStartX, dragStartY, dragEndX, dragEndY);
+                });
+
+                boardElement.appendChild(tile);
+            });
+        }
+
+        // Memeriksa tetangga ubin kosong
+        function isAdjacent(index1, index2) {
+            const r1 = Math.floor(index1 / boardSize);
+            const c1 = index1 % boardSize;
+            const r2 = Math.floor(index2 / boardSize);
+            const c2 = index2 % boardSize;
+
+            return (Math.abs(r1 - r2) + Math.abs(c1 - c2)) === 1;
+        }
+
+        // Logika geser ubin saat diketuk/diklik langsung
+        function handleTileClick(clickedIndex) {
+            const emptyIndex = board.indexOf(emptyTileValue);
+            if (isAdjacent(clickedIndex, emptyIndex)) {
+                board[emptyIndex] = board[clickedIndex];
+                board[clickedIndex] = emptyTileValue;
+                renderBoard();
+                checkWin();
+            }
+        }
+
+        // Deteksi arah geser/sapu (Swipe Direction)
+        function detectSwipe(clickedIndex, startX, startY, endX, endY) {
+            const dx = endX - startX;
+            const dy = endY - startY;
+            const threshold = 30; // Jarak tarikan geser minimal
+
+            // Jika tarikan geser terlalu pendek, dianggap klik biasa (click handler yang proses)
+            if (Math.abs(dx) < threshold && Math.abs(dy) < threshold) {
+                return; 
+            }
+
+            const emptyIndex = board.indexOf(emptyTileValue);
+            if (!isAdjacent(clickedIndex, emptyIndex)) return;
+
+            let swipeDirection = "";
+            if (Math.abs(dx) > Math.abs(dy)) {
+                swipeDirection = dx > 0 ? "right" : "left";
+            } else {
+                swipeDirection = dy > 0 ? "down" : "up";
+            }
+
+            // Dapatkan posisi baris/kolom clicked & empty
+            const clickR = Math.floor(clickedIndex / boardSize);
+            const clickC = clickedIndex % boardSize;
+            const emptyR = Math.floor(emptyIndex / boardSize);
+            const emptyC = emptyIndex % boardSize;
+
+            // Validasi arah geseran ke ubin kosong terdekat [1, 2.1]
+            let isValidSwipe = false;
+            if (swipeDirection === "right" && emptyR === clickR && emptyC === clickC + 1) isValidSwipe = true;
+            if (swipeDirection === "left" && emptyR === clickR && emptyC === clickC - 1) isValidSwipe = true;
+            if (swipeDirection === "down" && emptyR === clickR + 1 && emptyC === clickC) isValidSwipe = true;
+            if (swipeDirection === "up" && emptyR === clickR - 1 && emptyC === clickC) isValidSwipe = true;
+
+            if (isValidSwipe) {
+                board[emptyIndex] = board[clickedIndex];
+                board[clickedIndex] = emptyTileValue;
+                renderBoard();
+                checkWin();
+            }
+        }
+
+        // Pengacak yang terjamin 100% Solvable
+        function shuffleBoard() {
+            for (let i = 0; i < 120; i++) {
+                const emptyIndex = board.indexOf(emptyTileValue);
+                const legalMoves = [];
+
+                for (let j = 0; j < board.length; j++) {
+                    if (isAdjacent(j, emptyIndex)) {
+                        legalMoves.push(j);
+                    }
+                }
+
+                const randomMove = legalMoves[Math.floor(Math.random() * legalMoves.length)];
+                board[emptyIndex] = board[randomMove];
+                board[randomMove] = emptyTileValue;
+            }
+        }
+
+        // Memeriksa Kemenangan
+        function checkWin() {
+            const isWon = board.every((val, index) => val === index);
+            if (isWon) {
+                setTimeout(() => {
+                    const winOverlay = document.getElementById("win-overlay");
+                    winOverlay.style.display = "flex";
+                    void winOverlay.offsetWidth;
+                    winOverlay.style.opacity = "1";
+                }, 200);
+            }
+        }
+
+        function toggleHint() {
+            const hintImg = document.getElementById("hint-image");
+            if (hintImg.style.display === "block") {
+                hintImg.style.display = "none";
+            } else {
+                hintImg.style.display = "block";
+            }
+        }
+
+        function restartGame() {
+            board = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+            shuffleBoard();
+            renderBoard();
+        }
+
+        function closeWinOverlay() {
+            const winOverlay = document.getElementById("win-overlay");
+            winOverlay.style.opacity = "0";
+            setTimeout(() => {
+                winOverlay.style.display = "none";
+                restartGame();
+            }, 400);
+        }
+
+        // Fungsi Keluar Game dengan konfirmasi [2.1]
+        function confirmExit() {
+            const isConfirmed = confirm("Apakah anda yakin ingin keluar dari game?");
+            if (isConfirmed) {
+                window.location.href = "home.html"; // Kembali ke file utama [2.1]
+            }
+        }
+
+        // Mulai permainan otomatis saat dimuat
+        restartGame();
+    </script>
+</body>
+</html>
